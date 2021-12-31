@@ -1,0 +1,10 @@
+name: m25-napari
+display_name: M25 visualizer
+contributions:
+  commands: 
+    - id: m25-napari.make_qwidget
+      python_name: visualizer._widgetFunctions:M25Controls
+      title: M25 Test GUI
+  widgets:
+    - command: m25-napari.make_qwidget
+      display_name: M25 controls
