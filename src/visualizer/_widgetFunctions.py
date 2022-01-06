@@ -8,6 +8,8 @@ import mmap
 import math
 from PyQt5 import QtWidgets
 from matplotlib import pyplot as plt
+from napari._qt.qt_main_window import _QtMainWindow
+from napari._qt.qthreading import thread_worker
 import numpy as np
 #from StringIO import StringIO
 from PIL import *
@@ -25,7 +27,7 @@ from typing import Any, Tuple
 
 #Import Qt components
 from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QFileDialog,QMessageBox
+from PyQt5.QtWidgets import QAction, QWidget, QFileDialog,QMessageBox
 from PyQt5 import QtGui
 
 from visualizer.Qt import M25GUI
@@ -39,9 +41,12 @@ from napari import Viewer
 class M25Controls(QWidget):   
     def __init__(self,napari_viewer:Viewer):
         super().__init__()
+        
         self.M25app = None
-        self.initialize()
+        self.worker_client = None
+        self.worker_liveV = None 
         self.viewer = napari_viewer
+        self.initialize()
 
         
         #Init GUI with default
@@ -57,20 +62,20 @@ class M25Controls(QWidget):
         self.ui.radioButton.value = 8
         self.ui.radioButton_2.toggled.connect(self.onClicked)
         self.ui.radioButton_2.value = 16
-        self.ui.HorzLineEdit.setText("960")
-        self.ui.HorzLineEdit.textChanged.connect(self.sync_HorzLineEdit)
+        self.ui.HorzLineEdit.setText(str(self.M25app.horz))
+        self.ui.HorzLineEdit.editingFinished.connect(self.sync_HorzLineEdit)
         self.ui.HorzLineEdit.setValidator(self.onlyInt)
-        self.ui.VertLineEdit.setText("600")
-        self.ui.VertLineEdit.textChanged.connect(self.sync_VertLineEdit)
+        self.ui.VertLineEdit.setText(str(self.M25app.vert))
+        self.ui.VertLineEdit.editingFinished.connect(self.sync_VertLineEdit)
         self.ui.VertLineEdit.setValidator(self.onlyInt)
-        self.ui.FPSLineEdit.setText("60")
-        self.ui.FPSLineEdit.textChanged.connect(self.sync_FPSLineEdit)
+        self.ui.FPSLineEdit.setText(str(self.M25app.fps))
+        self.ui.FPSLineEdit.editingFinished.connect(self.sync_FPSLineEdit)
         self.ui.FPSLineEdit.setValidator(self.onlyInt)
-        self.ui.EXPLineEdit.setText("250000")
-        self.ui.EXPLineEdit.textChanged.connect(self.sync_EXPLineEdit)
+        self.ui.EXPLineEdit.setText(str(self.M25app.exp))
+        self.ui.EXPLineEdit.editingFinished.connect(self.sync_EXPLineEdit)
         self.ui.EXPLineEdit.setValidator(self.onlyInt)
-        self.ui.CapTimeLineEdit.setText("10")
-        self.ui.CapTimeLineEdit.textChanged.connect(self.sync_CapTimeLineEdit)
+        self.ui.CapTimeLineEdit.setText(str(self.M25app.capTime))
+        self.ui.CapTimeLineEdit.editingFinished.connect(self.sync_CapTimeLineEdit)
         self.ui.CapTimeLineEdit.setValidator(self.onlyInt)
         self.ui.MsgLineEdit.setText("Default")
         self.ui.StatusLineEdit.setText("OFFLINE")
@@ -80,12 +85,12 @@ class M25Controls(QWidget):
         self.ui.ReleaseCamsButton.clicked.connect(self.ReleaseState)
         self.ui.ConfButton.clicked.connect(self.ConfState)
         self.ui.CapturePushButton.clicked.connect(self.CaptureState)
-        self.ui.GainlineEdit.setText("0.0")
-        self.ui.GainlineEdit.textChanged.connect(self.sync_GainLineEdit)
-        self.ui.PNameLineEdit.textChanged.connect(self.sync_PNameLineEdit)
+        self.ui.GainlineEdit.setText(str(self.M25app.gain))
+        self.ui.GainlineEdit.editingFinished.connect(self.sync_GainLineEdit)
+        self.ui.PNameLineEdit.editingFinished.connect(self.sync_PNameLineEdit)
         self.ui.LiveButton.clicked.connect(self.toggleLive)
         self.ui.StackFramesEdit.setText("0")
-        self.ui.StackFramesEdit.textChanged.connect(self.sync_StackFramesEdit)
+        self.ui.StackFramesEdit.editingFinished.connect(self.sync_StackFramesEdit)
         # self.ui.ZStackBox = QCheckBox("Button1")
         self.ui.ZStackBox.setChecked(False)
         self.ui.ZStackBox.stateChanged.connect(self.checkClicked)
@@ -107,12 +112,11 @@ class M25Controls(QWidget):
         self._start_cmd()
         self._start_threads()
         
-        
-        
     def initialize(self):
         logging.info('Initializing QT and Comm')
         #Initialize the Qt GUI and the M25 Communications
-        self.M25app = M25Communication()
+        self.M25app = M25Communication(self.viewer)
+        self.M25app._init_threads()
         self.ui = M25GUI.Ui_Form()
         self.ui.setupUi(self)
         
@@ -130,7 +134,7 @@ class M25Controls(QWidget):
     def _start_threads(self):
         self.M25app.th.start()
         self.M25app.l_th.start()
-    
+        # self.M25app.l_th.start()
                
     ### Define the Signal Functions
     @pyqtSlot(bool)
@@ -169,7 +173,8 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
         
     @pyqtSlot()
-    def sync_HorzLineEdit(self, text):
+    def sync_HorzLineEdit(self):
+        text = self.ui.HorzLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
             self.M25app.horz = (int(text))
@@ -178,7 +183,8 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_VertLineEdit(self, text):
+    def sync_VertLineEdit(self):
+        text = self.ui.VertLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
             self.M25app.vert = (int(text))
@@ -187,25 +193,28 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_FPSLineEdit(self, text):
+    def sync_FPSLineEdit(self):
+        text = self.ui.FPSLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
-            self.M25app.fps = (int(text))
+            self.M25app.fps = int(text)
         else:
             self.M25app.fps = (0)
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_EXPLineEdit(self, text):
+    def sync_EXPLineEdit(self):
+        text = self.ui.EXPLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
-            self.M25app.exp = (int(text))
+            self.M25app.exp = int(text)
         else:
             self.M25app.exp = (0)
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_CapTimeLineEdit(self, text):
+    def sync_CapTimeLineEdit(self):
+        text = self.ui.CapTimeLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
             self.M25app.capTime = (int(text))
@@ -214,7 +223,8 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
-    def sync_GainLineEdit(self, text):
+    def sync_GainLineEdit(self):
+        text = self.ui.GainlineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
             self.M25app.gain = (float(text))
@@ -223,13 +233,16 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_PNameLineEdit(self, text):
+    def sync_PNameLineEdit(self):
+        text = self.ui.PNameLineEdit.text()
         self.M25app.write_mutex.acquire()
         self.M25app.proName = text
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
-    def sync_StackFramesEdit(self, text):
+    def sync_StackFramesEdit(self):
+        text = self.ui.StackFramesEdit.text()
+
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
             self.M25app.z_frames = int(text)
@@ -255,12 +268,15 @@ class M25Controls(QWidget):
     @pyqtSlot()
     def ConfState(self):
         logging.debug("Conf State")
-        logging.debug("flags{}".format(self.M25app.flags))
+        logging.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAPTURING or self.M25app.flags & _constants.ACQUIRING_CAMERAS or self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             pass
         else:
             self.M25app.flags |= _constants.CHANGE_CONFIG
+            logging.debug("FPS {}, Gain {}, CapTime{}".format( int(self.ui.FPSLineEdit.text()),
+                                                                float(self.ui.GainlineEdit.text()),
+                                                                int(self.ui.CapTimeLineEdit.text())))
         self.M25app.write_mutex.release()
         
     @pyqtSlot()
@@ -274,6 +290,7 @@ class M25Controls(QWidget):
     
     @pyqtSlot()  
     def CaptureState(self):
+        logging.debug("CAPTURE Pressed")
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             if self.M25app.flags &_constants.CAPTURING:
@@ -282,6 +299,7 @@ class M25Controls(QWidget):
                 if self.M25app.zMode == True:
                     self.M25app.flags |= _constants.START_Z_STACK
                 else:
+                    logging.debug("CAPTURE STARTED")
                     self.M25app.flags |= _constants.START_CAPTURE
         self.M25app.write_mutex.release()
     
@@ -302,7 +320,8 @@ class M25Controls(QWidget):
                 self.M25app.sleep_mutex.set()
         self.M25app.write_mutex.release()
     
-    def closeEvent(self, event):
+    
+    def _cleanup_M25Plugin(self, event):
         reply = QMessageBox.question(self, 'Window Close', 'Are you sure you want to close the window?',
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
@@ -322,7 +341,7 @@ class M25Controls(QWidget):
             event.accept()
         else:
             event.ignore()
-       
+            
 
 
 ## Adopted from Todd Vanyo's https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
