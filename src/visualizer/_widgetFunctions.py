@@ -48,11 +48,11 @@ class M25Controls(QWidget):
         self.viewer = napari_viewer
         self.initialize()
 
-        
+        self.viewer.window.ev
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
-        self.path = "D:\\Ant1 Test\\raws"   #TODO: change to a more default folder later
+        self.path = "E:\Ed"   #TODO: change to a more default folder later
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
@@ -77,8 +77,8 @@ class M25Controls(QWidget):
         self.ui.CapTimeLineEdit.setText(str(self.M25app.capTime))
         self.ui.CapTimeLineEdit.editingFinished.connect(self.sync_CapTimeLineEdit)
         self.ui.CapTimeLineEdit.setValidator(self.onlyInt)
-        self.ui.MsgLineEdit.setText("Default")
-        self.ui.StatusLineEdit.setText("OFFLINE")
+        # self.ui.MsgLineEdit.setText("Default")
+        # self.ui.StatusLineEdit.setText("OFFLINE")
         self.ui.radioButton.setChecked(True)
         self.ui.BrowsePushButton.clicked.connect(self.browseState)
         self.ui.AcquireCamsButton.clicked.connect(self.AcquireState)
@@ -320,12 +320,7 @@ class M25Controls(QWidget):
                 self.M25app.sleep_mutex.set()
         self.M25app.write_mutex.release()
     
-    
     def _cleanup_M25Plugin(self, event):
-        reply = QMessageBox.question(self, 'Window Close', 'Are you sure you want to close the window?',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        if reply == QMessageBox.Yes:
             logging.info("CLOSING STARTED")
             self.M25app.write_mutex.acquire()
             self.M25app.flags |= _constants.EXIT_THREAD
@@ -338,15 +333,11 @@ class M25Controls(QWidget):
             self.M25app.th.join
             self.M25app.l_th.join
             time.sleep(0.2)
-            event.accept()
-        else:
-            event.ignore()
+    
             
 
 
 ## Adopted from Todd Vanyo's https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
-
-
 # Linking Napari Log to our logger
 # Adopted from Cam's' RecOrder
 class QtLogger(logging.Handler): 

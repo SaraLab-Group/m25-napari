@@ -41,8 +41,8 @@ class M25Communication:
     #Camera Globals
     horz: int = 960
     vert: int = 600
-    fps: int = 60
-    exp: int = 10000
+    fps: int = 2
+    exp: int = 250000
     bpp: int = 8
     capTime: int = 10
     z_frames: int = 0
@@ -123,20 +123,7 @@ class M25Communication:
                 self.write_mutex.release()
                 #logging.debug('Received ' + repr(data))
                 time.sleep(0.1)
-            
-            
-    # def liveView_thread(self,napari_viewer:Viewer):
-    #     logging.debug("Start LiveView")
-    #     while self.run:
-    #         logging.debug("Before Wait")
-    #         self.sleep_mutex.wait(None)
-    #         logging.debug("Before LiveView Function")
-    #         if self.run:
-    #             logging.debug("IT's ALIVEEEEEE")
-    #             # self.liveView_func()
-    #             self.liveView_napari(napari_viewer)
-    #         logging.debug("Bottom of Looop")
-    
+                
     @thread_worker
     def liveView_napari(self):
         while self.run:
@@ -223,12 +210,12 @@ class M25Communication:
                         if self.horz < 960:
                             # myimg.set_data(dst)
                             yield np.array(dst)
-
                         else:
                             # myimg.set_data(dst.resize((self.horz*2, self.vert*2)))
                             yield np.array(dst)
                     if not self.live_running:
                         layer.data = []
+                        
                     frameVect.clear()
                     #time.sleep(0.001)
                     logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
@@ -245,7 +232,7 @@ class M25Communication:
         """
         try:
             self.napari_viewer.layers['M25_cam'].data  =image
-            time.sleep(0.001)
+            time.sleep(0.003)
         except KeyError:
             self.napari_viewer.add_image(image, name='M25_cam')
 
