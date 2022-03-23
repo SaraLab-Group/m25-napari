@@ -41,8 +41,8 @@ class M25Communication:
     #Camera Globals
     horz: int = 960
     vert: int = 600
-    fps: int = 60
-    exp: int = 10000
+    fps: int = 2
+    exp: int = 250000
     bpp: int = 8
     capTime: int = 10
     z_frames: int = 0
@@ -123,20 +123,7 @@ class M25Communication:
                 self.write_mutex.release()
                 #logging.debug('Received ' + repr(data))
                 time.sleep(0.1)
-            
-            
-    # def liveView_thread(self,napari_viewer:Viewer):
-    #     logging.debug("Start LiveView")
-    #     while self.run:
-    #         logging.debug("Before Wait")
-    #         self.sleep_mutex.wait(None)
-    #         logging.debug("Before LiveView Function")
-    #         if self.run:
-    #             logging.debug("IT's ALIVEEEEEE")
-    #             # self.liveView_func()
-    #             self.liveView_napari(napari_viewer)
-    #         logging.debug("Bottom of Looop")
-    
+                
     @thread_worker
     def liveView_napari(self):
         while self.run:
@@ -158,7 +145,7 @@ class M25Communication:
                 frameVect.clear()
                 buff1.seek(0)
                 buff2.seek(0)
-                layer = None
+                # layer = None
                 imgshape = [self.horz, self.vert]
                 imgshape_960 = [self.horz * 5, self.vert * 5]
                 if self.singleMode:
@@ -179,8 +166,7 @@ class M25Communication:
                 logging.debug("CHeck if live running")
                 while self.live_running:
                     # logging.debug("LIVE RUNNING SETUP")
-                    start = time.time()
-                    # do stuff
+                    # start = time.time()
                     read_flags = RW_flags.read_byte()
                     # logging.debug("FLAG"+ str(read_flags))
                     RW_flags.seek(0)
@@ -219,19 +205,14 @@ class M25Communication:
                                                         frameVect[i],
                                                         'raw', 'L', 0, 1)
                             dst.paste(image_conv, [self.horz * (i % 5), self.vert * ((i // 5 % 5))])
-
-                        if self.horz < 960:
-                            # myimg.set_data(dst)
-                            yield np.array(dst)
-
-                        else:
-                            # myimg.set_data(dst.resize((self.horz*2, self.vert*2)))
-                            yield np.array(dst)
+                        yield np.array(dst)
+                                                                    
                     if not self.live_running:
-                        layer.data = []
+                        dst=[]  
+
                     frameVect.clear()
                     #time.sleep(0.001)
-                    logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
+                    # logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
                 
                 # Send blank layer
                 dst =[]
@@ -244,8 +225,8 @@ class M25Communication:
             image ([type]): [description]
         """
         try:
-            self.napari_viewer.layers['M25_cam'].data  =image
-            time.sleep(0.001)
+            self.napari_viewer.layers['M25_cam'].data = image
+            time.sleep(0.003)
         except KeyError:
             self.napari_viewer.add_image(image, name='M25_cam')
 

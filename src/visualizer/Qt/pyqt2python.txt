@@ -1,0 +1,1 @@
+pyuic5 M25_Widget2_logger.ui -o M25GUI.py
