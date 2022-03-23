@@ -48,7 +48,6 @@ class M25Controls(QWidget):
         self.viewer = napari_viewer
         self.initialize()
 
-        self.viewer.window.ev
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
@@ -107,7 +106,8 @@ class M25Controls(QWidget):
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
         logging.getLogger().addHandler(log_box)
         #Change logging to INFO or DEBUG to see all log (info,debug,warning)
-        logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
         
         self._start_cmd()
         self._start_threads()
@@ -306,10 +306,13 @@ class M25Controls(QWidget):
     @pyqtSlot()
     def toggleLive(self):
         self.M25app.write_mutex.acquire()
+        logging.debug("LIVE PRESS")
+        logging.debug("Live Running %d", self.M25app.live_running)
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             if self.M25app.flags & _constants.CAPTURING:
                 pass
             elif self.M25app.live_running:
+                logging.debug("STOPPING LIVE")
                 self.M25app.live_running = False
                 self.M25app.flags |= _constants.STOP_LIVE
                 self.M25app.flags &= ~(_constants.LIVE_RUNNING)
