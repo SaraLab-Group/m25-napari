@@ -1,5 +1,6 @@
 
 import sys
+import os
 import binascii
 import threading
 import time
@@ -126,7 +127,9 @@ class M25Controls(QWidget):
 
     def _start_cmd(self):
             # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
-        self.exe_path = r'C:\Users\Callisto\Documents\abajor\M25_basler\basler_candidate\ide\x64\Debug'
+        # self.exe_path = r'C:\Users\Callisto\Documents\abajor\M25_basler\basler_candidate\ide\x64\Debug'
+        self.exe_path = os.path.dirname(__file__)
+        # self.exe_path = os.path.join(dirname,'')
         self.myEXE = "Basler_Candidate.exe"
         logging.debug(str(self.exe_path))
         rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
