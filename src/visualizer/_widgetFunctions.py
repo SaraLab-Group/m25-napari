@@ -1,14 +1,17 @@
 
 import sys
 import os
-import binascii
-import threading
+import psutil
+# import binascii
+# import threading
 import time
 import struct
 import mmap
 import math
+import signal
 from PyQt5 import QtWidgets
 from matplotlib import pyplot as plt
+from psutil import Popen
 from napari._qt.qt_main_window import _QtMainWindow
 from napari._qt.qthreading import thread_worker
 import numpy as np
@@ -101,7 +104,7 @@ class M25Controls(QWidget):
         self.ui.CamSpinBox.valueChanged.connect(self.singleSpinClicked)
         self.ui.SingleCamCheckBox.setChecked(False)
         self.ui.SingleCamCheckBox.stateChanged.connect(self.singleClicked)
-        
+        self.ui.exitBtn.clicked.connect(self.cleanup_M25Plugin)
         ## Logging
         log_box = QtLogger(self.ui.logTextBox)
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
@@ -132,10 +135,12 @@ class M25Controls(QWidget):
         # self.exe_path = os.path.join(dirname,'')
         self.myEXE = "Basler_Candidate.exe"
         logging.debug(str(self.exe_path))
-        rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
+        self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
+        # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
     
     def _start_threads(self):
         self.M25app.th.start()
+        # self.M25app.l_th.finished.connect(self.ui.exitBtn.clicked)
         self.M25app.l_th.start()
         # self.M25app.l_th.start()
                
@@ -326,20 +331,28 @@ class M25Controls(QWidget):
                 self.M25app.sleep_mutex.set()
         self.M25app.write_mutex.release()
     
-    def _cleanup_M25Plugin(self, event):
-            logging.info("CLOSING STARTED")
-            self.M25app.write_mutex.acquire()
-            self.M25app.flags |= _constants.EXIT_THREAD
-            self.M25app.write_mutex.release()
-            logging.debug('close event fired')
-            time.sleep(0.2)
-            self.M25app.run = False
-            self.M25app.live_running = False
-            self.M25app.sleep_mutex.set()
-            self.M25app.th.join
-            self.M25app.l_th.join
-            time.sleep(0.2)
-    
+    @pyqtSlot()
+    def cleanup_M25Plugin(self):
+        logging.info("CLOSING STARTED")
+
+        self.M25app.write_mutex.acquire()
+        self.M25app.flags |= _constants.EXIT_THREAD
+        self.M25app.write_mutex.release()
+        logging.debug('close event fired')
+        time.sleep(0.2)
+        self.M25app.run = False
+        self.M25app.live_running = False
+        self.M25app.sleep_mutex.set()
+        self.M25app.th.join()
+        # self.M25app.l_th.join   #Since it is a Napari Worker then 
+        time.sleep(0.2)
+        self.viewer.window.remove_dock_widget(self)
+        # Popen("TASKKILL /F /PID :{pid} /T".format(pid =self.rc.pid))
+        time.sleep(0.2)
+        # time.sleep(0.2)
+
+        # rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
+ 
             
 
 
