@@ -47,8 +47,8 @@ class M25Controls(QWidget):
         super().__init__()
         
         self.M25app = None
-        self.worker_client = None
-        self.worker_liveV = None 
+        # self.worker_client = None
+        # self.worker_liveV = None 
         self.viewer = napari_viewer
         self.initialize()
 
@@ -106,6 +106,7 @@ class M25Controls(QWidget):
         self.ui.SingleCamCheckBox.stateChanged.connect(self.singleClicked)
         self.ui.exitBtn.clicked.connect(self.cleanup_M25Plugin)
         self.ui.loadBtn.clicked.connect(self.load_dataset)
+        
         ## Logging
         log_box = QtLogger(self.ui.logTextBox)
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
@@ -355,9 +356,9 @@ class M25Controls(QWidget):
         loading_path= str(QFileDialog.getExistingDirectory(self, "Select Directory",self.M25app.path))
         # main_folder = os.path.join(self.M25app.path, self.filename)
         try:
-            stack = calibration.load_dataset(loading_path,'uint8')
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint8', height=600, width =960)
         except: 
-            stack = calibration.load_dataset(loading_path,'uint16')
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=600, width =960)
         self.viewer.add_image(stack)
 
 
@@ -373,4 +374,3 @@ class QtLogger(logging.Handler):
     def emit(self,record):
         msg = self.format(record)
         self.widget.appendPlainText(msg)
-        
