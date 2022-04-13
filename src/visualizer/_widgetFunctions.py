@@ -30,8 +30,8 @@ from ctypes import *
 from typing import Any, Tuple
 
 #Import Qt components
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QAction, QWidget, QFileDialog,QMessageBox
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QObject
+from PyQt5.QtWidgets import QAction, QWidget, QFileDialog
 from PyQt5 import QtGui
 
 from visualizer.Qt import M25GUI
@@ -106,7 +106,26 @@ class M25Controls(QWidget):
         self.ui.SingleCamCheckBox.stateChanged.connect(self.singleClicked)
         self.ui.exitBtn.clicked.connect(self.cleanup_M25Plugin)
         self.ui.loadBtn.clicked.connect(self.load_dataset)
+     
+        self.start_logging()
+    
+        self._start_cmd()
+        self._start_threads()
+    
+    def initialize(self):
+        self.ui = M25GUI.Ui_Form()
+        self.ui.setupUi(self)
         
+        logging.info('Initializing Comm')
+        #Initialize the Qt GUI and the M25 Communications
+        self.M25app = M25Communication(self.viewer)
+        self.M25app._init_threads()
+
+        
+        ### Initialize M25 app communication file and globals
+        self.M25app.bpp = 8
+        
+    def start_logging(self):
         ## Logging
         log_box = QtLogger(self.ui.logTextBox)
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
@@ -114,21 +133,6 @@ class M25Controls(QWidget):
         #Change logging to INFO or DEBUG to see all log (info,debug,warning)
         logging.getLogger().setLevel(logging.DEBUG)
         # logging.getLogger().setLevel(logging.INFO)
-        
-        self._start_cmd()
-        self._start_threads()
-        
-    def initialize(self):
-        logging.info('Initializing QT and Comm')
-        #Initialize the Qt GUI and the M25 Communications
-        self.M25app = M25Communication(self.viewer)
-        self.M25app._init_threads()
-        self.ui = M25GUI.Ui_Form()
-        self.ui.setupUi(self)
-        
-        ### Initialize M25 app communication file and globals
-        self.M25app.bpp = 8
-        
 
     def _start_cmd(self):
             # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
@@ -366,11 +370,14 @@ class M25Controls(QWidget):
 ## Adopted from Todd Vanyo's https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
 # Linking Napari Log to our logger
 # Adopted from Cam's' RecOrder
-class QtLogger(logging.Handler): 
+class QtLogger(logging.Handler,QObject): 
+    appendPlainText = pyqtSignal(str)
     def __init__(self,widget):
         super().__init__()
+        QObject.__init__(self)
         self.widget = widget
-        
+        self.appendPlainText.connect(self.widget.appendPlainText)
     def emit(self,record):
         msg = self.format(record)
-        self.widget.appendPlainText(msg)
+        # self.widget.appendPlainText(msg)
+        self.appendPlainText.emit(msg)
