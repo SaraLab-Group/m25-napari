@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>858</width>
-    <height>431</height>
+    <width>1026</width>
+    <height>845</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -20,7 +20,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="5" column="3">
+   <item row="6" column="3">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="CapturePushButton">
@@ -99,52 +99,58 @@ background-color: rgb(0, 170, 0);</string>
      </item>
     </layout>
    </item>
-   <item row="6" column="3">
-    <layout class="QVBoxLayout" name="verticalLayout_13">
+   <item row="5" column="3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="MsgLabel">
+      <widget class="QPushButton" name="ConfButton">
        <property name="text">
-        <string>Messages:</string>
+        <string>SetConf</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="widgetResizable">
-        <bool>true</bool>
+      <widget class="QPushButton" name="AcquireCamsButton">
+       <property name="text">
+        <string>AcqCams</string>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents_3">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>819</width>
-          <height>89</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPlainTextEdit" name="logTextBox"/>
-         </item>
-        </layout>
-       </widget>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ReleaseCamsButton">
+       <property name="text">
+        <string>FreeCams</string>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
-   <item row="1" column="3" rowspan="3">
+   <item row="1" column="3">
+    <widget class="QLabel" name="ResolutionLabel">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Resolution</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3" rowspan="3">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="3" column="0">
-      <layout class="QVBoxLayout" name="verticalLayout_9">
+     <item row="0" column="1">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QLabel" name="FPSLabel">
+        <widget class="QLabel" name="VertLabel">
          <property name="text">
-          <string>Frames Per Second</string>
+          <string>Vertical</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="FPSLineEdit">
+        <widget class="QLineEdit" name="VertLineEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -154,6 +160,101 @@ background-color: rgb(0, 170, 0);</string>
         </widget>
        </item>
       </layout>
+     </item>
+     <item row="0" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="HorzLabel">
+         <property name="text">
+          <string>Horizontal</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="HorzLineEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="1">
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QLabel" name="EXPLabel">
+         <property name="text">
+          <string>Exposure(µs)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="EXPLineEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="0" column="2" colspan="2">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="WritePLlabel">
+         <property name="text">
+          <string>Image Write Path</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLineEdit" name="WritePLineEdit"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="BrowsePushButton">
+           <property name="text">
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="3">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLabel" name="ProjectNameLabel">
+         <property name="text">
+          <string>Project Name</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="PNameLineEdit"/>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Acquisition Settings</string>
+       </property>
+      </widget>
      </item>
      <item row="4" column="0">
       <layout class="QVBoxLayout" name="verticalLayout_10">
@@ -180,17 +281,38 @@ background-color: rgb(0, 170, 0);</string>
        </item>
       </layout>
      </item>
-     <item row="3" column="1">
-      <layout class="QVBoxLayout" name="verticalLayout_11">
+     <item row="4" column="1">
+      <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <widget class="QLabel" name="EXPLabel">
+        <widget class="QLabel" name="GainLabel">
          <property name="text">
-          <string>Exposure(µs)</string>
+          <string>Gain(dB)</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="EXPLineEdit">
+        <widget class="QLineEdit" name="GainlineEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="0">
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QLabel" name="FPSLabel">
+         <property name="text">
+          <string>Frames Per Second</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="FPSLineEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -237,48 +359,6 @@ background-color: rgb(0, 170, 0);</string>
        </item>
       </layout>
      </item>
-     <item row="0" column="1">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QLabel" name="VertLabel">
-         <property name="text">
-          <string>Vertical</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="VertLineEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="0" column="0">
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="HorzLabel">
-         <property name="text">
-          <string>Horizontal</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="HorzLineEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
      <item row="3" column="3">
       <layout class="QVBoxLayout" name="verticalLayout_12">
        <item>
@@ -293,118 +373,100 @@ background-color: rgb(0, 170, 0);</string>
        </item>
       </layout>
      </item>
-     <item row="0" column="2" colspan="2">
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item>
-        <widget class="QLabel" name="WritePLlabel">
-         <property name="text">
-          <string>Image Write Path</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QLineEdit" name="WritePLineEdit"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="BrowsePushButton">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </item>
-     <item row="4" column="1">
-      <layout class="QVBoxLayout" name="verticalLayout_7">
-       <item>
-        <widget class="QLabel" name="GainLabel">
-         <property name="text">
-          <string>Gain(dB)</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="GainlineEdit">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item row="1" column="3">
-      <layout class="QVBoxLayout" name="verticalLayout_5">
-       <item>
-        <widget class="QLabel" name="ProjectNameLabel">
-         <property name="text">
-          <string>Project Name</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="PNameLineEdit"/>
-       </item>
-      </layout>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Acquisition Settings</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
-   <item row="4" column="3">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+   <item row="8" column="3">
+    <layout class="QVBoxLayout" name="verticalLayout_13">
      <item>
-      <widget class="QPushButton" name="ConfButton">
+      <widget class="QLabel" name="MsgLabel">
        <property name="text">
-        <string>SetConf</string>
+        <string>Messages:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="AcquireCamsButton">
-       <property name="text">
-        <string>AcqCams</string>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="ReleaseCamsButton">
-       <property name="text">
-        <string>FreeCams</string>
-       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>1004</width>
+          <height>423</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QPlainTextEdit" name="logTextBox"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>
    </item>
    <item row="0" column="3">
-    <widget class="QLabel" name="ResolutionLabel">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="1">
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="exitBtn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+         <strikeout>false</strikeout>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>5</width>
+         <height>5</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="7" column="3">
+    <widget class="QPushButton" name="loadBtn">
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 220, 42);</string>
      </property>
      <property name="text">
-      <string>Resolution</string>
+      <string>Load Dataset</string>
      </property>
     </widget>
    </item>

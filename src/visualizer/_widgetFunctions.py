@@ -1,14 +1,17 @@
 
 import sys
 import os
-import binascii
-import threading
+import psutil
+# import binascii
+# import threading
 import time
 import struct
 import mmap
 import math
+import signal
 from PyQt5 import QtWidgets
 from matplotlib import pyplot as plt
+from psutil import Popen
 from napari._qt.qt_main_window import _QtMainWindow
 from napari._qt.qthreading import thread_worker
 import numpy as np
@@ -16,7 +19,7 @@ import numpy as np
 from PIL import *
 from PIL import ImageDraw
 from PIL import Image
-
+import sys
 from datetime import date
 from lib2to3.pytree import convert
 from struct import unpack
@@ -27,8 +30,8 @@ from ctypes import *
 from typing import Any, Tuple
 
 #Import Qt components
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QAction, QWidget, QFileDialog,QMessageBox
+from PyQt5.QtCore import pyqtSlot, pyqtSignal, QObject
+from PyQt5.QtWidgets import QAction, QWidget, QFileDialog
 from PyQt5 import QtGui
 
 from visualizer.Qt import M25GUI
@@ -37,15 +40,15 @@ import visualizer._constants as _constants
 
 import logging
 from napari import Viewer
-
+import visualizer.calibration as calibration
 
 class M25Controls(QWidget):   
     def __init__(self,napari_viewer:Viewer):
         super().__init__()
         
         self.M25app = None
-        self.worker_client = None
-        self.worker_liveV = None 
+        # self.worker_client = None
+        # self.worker_liveV = None 
         self.viewer = napari_viewer
         self.initialize()
 
@@ -101,29 +104,35 @@ class M25Controls(QWidget):
         self.ui.CamSpinBox.valueChanged.connect(self.singleSpinClicked)
         self.ui.SingleCamCheckBox.setChecked(False)
         self.ui.SingleCamCheckBox.stateChanged.connect(self.singleClicked)
+        self.ui.exitBtn.clicked.connect(self.cleanup_M25Plugin)
+        self.ui.loadBtn.clicked.connect(self.load_dataset)
+     
+        self.start_logging()
+    
+        self._start_cmd()
+        self._start_threads()
+    
+    def initialize(self):
+        self.ui = M25GUI.Ui_Form()
+        self.ui.setupUi(self)
         
+        logging.info('Initializing Comm')
+        #Initialize the Qt GUI and the M25 Communications
+        self.M25app = M25Communication(self.viewer)
+        self.M25app._init_threads()
+
+        
+        ### Initialize M25 app communication file and globals
+        self.M25app.bpp = 8
+        
+    def start_logging(self):
         ## Logging
         log_box = QtLogger(self.ui.logTextBox)
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
         logging.getLogger().addHandler(log_box)
         #Change logging to INFO or DEBUG to see all log (info,debug,warning)
-        # logging.getLogger().setLevel(logging.DEBUG)
-        logging.getLogger().setLevel(logging.INFO)
-        
-        self._start_cmd()
-        self._start_threads()
-        
-    def initialize(self):
-        logging.info('Initializing QT and Comm')
-        #Initialize the Qt GUI and the M25 Communications
-        self.M25app = M25Communication(self.viewer)
-        self.M25app._init_threads()
-        self.ui = M25GUI.Ui_Form()
-        self.ui.setupUi(self)
-        
-        ### Initialize M25 app communication file and globals
-        self.M25app.bpp = 8
-        
+        logging.getLogger().setLevel(logging.DEBUG)
+        # logging.getLogger().setLevel(logging.INFO)
 
     def _start_cmd(self):
             # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
@@ -132,12 +141,13 @@ class M25Controls(QWidget):
         # self.exe_path = os.path.join(dirname,'')
         self.myEXE = "Basler_Candidate.exe"
         logging.debug(str(self.exe_path))
-        rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
+        self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
+        # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
     
     def _start_threads(self):
         self.M25app.th.start()
+        # self.M25app.l_th.finished.connect(self.ui.exitBtn.clicked)
         self.M25app.l_th.start()
-        # self.M25app.l_th.start()
                
     ### Define the Signal Functions
     @pyqtSlot(bool)
@@ -237,9 +247,9 @@ class M25Controls(QWidget):
 
     @pyqtSlot()
     def sync_PNameLineEdit(self):
-        text = self.ui.PNameLineEdit.text()
+        self.acquisition_filename = self.ui.PNameLineEdit.text()
         self.M25app.write_mutex.acquire()
-        self.M25app.proName = text
+        self.M25app.proName = self.acquisition_filename
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
@@ -255,7 +265,9 @@ class M25Controls(QWidget):
     
     @pyqtSlot()    
     def browseState(self):
-        self.M25app.path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        #TODO: make this open at the default directory
+        self.M25app.path = str(QFileDialog.getExistingDirectory(self, "Select Directory",self.path))
+        self.path=self.M25app.path
         self.ui.WritePLineEdit.setText(self.M25app.path)
     
     @pyqtSlot()
@@ -326,32 +338,46 @@ class M25Controls(QWidget):
                 self.M25app.sleep_mutex.set()
         self.M25app.write_mutex.release()
     
-    def _cleanup_M25Plugin(self, event):
-            logging.info("CLOSING STARTED")
-            self.M25app.write_mutex.acquire()
-            self.M25app.flags |= _constants.EXIT_THREAD
-            self.M25app.write_mutex.release()
-            logging.debug('close event fired')
-            time.sleep(0.2)
-            self.M25app.run = False
-            self.M25app.live_running = False
-            self.M25app.sleep_mutex.set()
-            self.M25app.th.join
-            self.M25app.l_th.join
-            time.sleep(0.2)
-    
-            
+    @pyqtSlot()
+    def cleanup_M25Plugin(self):
+        logging.info("CLOSING STARTED")
+        self.M25app.write_mutex.acquire()
+        self.M25app.flags |= _constants.EXIT_THREAD
+        self.M25app.write_mutex.release()
+        logging.debug('close event fired')
+        time.sleep(0.2)
+        self.M25app.run = False
+        self.M25app.live_running = False
+        self.M25app.sleep_mutex.set()
+        self.M25app.th.join()
+        # self.M25app.l_th.join   #Since it is a Napari Worker then 
+        time.sleep(0.2)
+        self.viewer.window.remove_dock_widget(self)
+
+    @pyqtSlot()
+    def load_dataset(self):
+        #TODO Add calibration.py to package or make loading separate package
+        loading_path= str(QFileDialog.getExistingDirectory(self, "Select Directory",self.M25app.path))
+        # main_folder = os.path.join(self.M25app.path, self.filename)
+        try:
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint8', height=600, width =960)
+        except: 
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=600, width =960)
+        self.viewer.add_image(stack)
+
 
 
 ## Adopted from Todd Vanyo's https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
 # Linking Napari Log to our logger
 # Adopted from Cam's' RecOrder
-class QtLogger(logging.Handler): 
+class QtLogger(logging.Handler,QObject): 
+    appendPlainText = pyqtSignal(str)
     def __init__(self,widget):
         super().__init__()
+        QObject.__init__(self)
         self.widget = widget
-        
+        self.appendPlainText.connect(self.widget.appendPlainText)
     def emit(self,record):
         msg = self.format(record)
-        self.widget.appendPlainText(msg)
-        
+        # self.widget.appendPlainText(msg)
+        self.appendPlainText.emit(msg)
