@@ -39,8 +39,8 @@ class M25Communication:
     singleCam = 13
     
     #Camera Globals
-    horz: int = 960
-    vert: int = 600
+    horz: int = 808
+    vert: int = 608
     fps: int = 2
     exp: int = 250000
     bpp: int = 8
@@ -50,7 +50,7 @@ class M25Communication:
     flags: int = 0
     
     #Threading events
-    sleep_mutex = threading.Event()
+    # sleep_mutex = threading.Event()
     write_mutex = threading.Lock()
     
     th = None
@@ -59,15 +59,18 @@ class M25Communication:
     def __init__(self,napari_viewer:Viewer):  
         super().__init__()
         self.napari_viewer = napari_viewer   
-        
-        logging.debug("initiating threads and workers")
+        hdlr = logging.StreamHandler()
+        hdlr.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
+        self.m25_log = logging.getLogger('m25_logger')
+        self.m25_log.addHandler(hdlr)
+        self.m25_log.setLevel(logging.DEBUG)
+
+        self.m25_log.debug("initiating threads and workers")
         self.th = threading.Thread(target=self.client_thread)        
         #Calling it Napari way
         self.l_th = self.liveView_napari()
         self.l_th.yielded.connect(self.update_layer)
-        #Initialize Threads
-        # self.th = threading.Thread(target=self.client_thread)
-        # self.l_th = threading.Thread(target=self.liveView_thread)
+
     def _init_threads(self):
         pass        
         # self.l_th = threading.Thread(target=self.liveView_thread, args =(napari_viewer,))
@@ -75,8 +78,8 @@ class M25Communication:
     def client_thread(self):
     #time.sleep(2)
         prevFlag = 0
-        logging.debug("Client Thread")
-        logging.debug("Run Flag {}".format(self.run))
+        self.m25_log.debug("Client Thread")
+        self.m25_log.debug("Run Flag {}".format(self.run))
         while self.run:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((self.HOST, self.PORT))
@@ -88,7 +91,7 @@ class M25Communication:
                 # logging.debug('flags: %d' % int(self.flags))                    
                 if self.flags & _constants.EXIT_THREAD:
                     self.write_mutex.release()
-                    logging.debug('Closing Socket')
+                    self.m25_log.debug('Closing Socket')
                     self.run = False
                     s.close()
                 else:
@@ -116,7 +119,7 @@ class M25Communication:
                             
                 self.write_mutex.acquire()
                 if prevFlag != rec_flags:
-                    logging.debug('Received flags: {}'.format(str(hex(rec_flags))))
+                    self.m25_log.debug('Received flags: {}'.format(str(hex(rec_flags))))
 
                 self.flags = self.flags | rec_flags
                 prevFlag = rec_flags
@@ -127,9 +130,10 @@ class M25Communication:
     @thread_worker
     def liveView_napari(self):
         while self.run:
-            self.sleep_mutex.wait(None)
+            # self.sleep_mutex.wait(None)
+            # self.l_th.pause()
             if self.run:
-                logging.debug("IT's ALIVEEEEEE")
+                self.m25_log.debug("IT's ALIVEEEEEE")
                 self.live_running = True
                 # Create Memory Maps
                 imageSize = np.uint64((self.horz * self.vert) / 8 * self.bpp)
@@ -149,23 +153,24 @@ class M25Communication:
                 imgshape = [self.horz, self.vert]
                 imgshape_960 = [self.horz * 5, self.vert * 5]
                 if self.singleMode:
-                    logging.debug("SINGLE MODE INIT")
+                    self.m25_log.debug("SINGLE MODE INIT")
                     # myimg = plt.imshow(np.zeros([self.vert, self.horz]))
                     dst = Image.new('L', imgshape)
                     # layer = napari_viewer.add_image(np.zeros(imgshape))
-                    yield np.array(dst)
+                    # yield np.array(dst)
                 else:
-                    if self.horz < 960:
+                    self.m25_log.debug("MULTICAM MODE INIT")
+                    if self.horz < 808:
                         # myimg = plt.imshow(np.zeros([self.vert*5, self.horz*5]))
                         myimg = np.zeros(imgshape)
                     else:
                         myimg = np.zeros(imgshape_960)
                     dst = Image.new('L', imgshape_960)
-                    yield np.array(dst)
+                    # yield np.array(dst)
                     
-                logging.debug("CHeck if live running")
                 while self.live_running:
-                    # logging.debug("LIVE RUNNING SETUP")
+                    # self.m25_log.debug("LIVE RUNNING SETUP")
+                    # self.m25_log.debug("live_running flag: {}".format(self.live_running))
                     # start = time.time()
                     read_flags = RW_flags.read_byte()
                     # logging.debug("FLAG"+ str(read_flags))
@@ -193,10 +198,12 @@ class M25Communication:
                     # logging.debug("Then length: ", len(frameVect[i]))
                     # RW_flags &= ~( READING_BUFF1 | READING_BUFF2 )
                     if self.singleMode:
+                        # self.m25_log.debug("DIsplayingCam: {}".format(self.singleCam))
                         dst = Image.frombuffer("L", [self.horz, self.vert],
                                                     frameVect[self.singleCam - 1],
                                                     'raw', 'L', 0, 1)
                         # myimg.set_data(dst)
+                        time.sleep(0.016)
                         yield np.array(dst)
                         
                     else:
@@ -215,8 +222,8 @@ class M25Communication:
                     # logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
                 
                 # Send blank layer
-                dst =[]
-                yield np.array(dst)
+                # dst =[]
+                # yield np.array(dst)
     
     def update_layer(self, image):
         """[summary]
@@ -226,108 +233,8 @@ class M25Communication:
         """
         try:
             self.napari_viewer.layers['M25_cam'].data = image
-            time.sleep(0.003)
+            time.sleep(0.001)
+            # self.m25_log.debug("NEW FRAME IN")
         except KeyError:
             self.napari_viewer.add_image(image, name='M25_cam')
-
-    # def liveView_func(self):
-    #     if self.run:
-    #         self.live_running = True
-    #         # Create Memory Maps
-    #         imageSize = np.uint64((self.horz * self.vert) / 8 * self.bpp)
-    #         # adhearing to sector aligned memory
-    #         if imageSize % 512 != 0:
-    #             imageSize += (512 - (imageSize % 512))
-    #         imgObj = np.dtype(np.uint8, imageSize)
-    #         RW_flags = mmap.mmap(0, 8, "Local\\Flags")  # for basic signaling
-    #         buff1 = mmap.mmap(0, int(imageSize * 25), "Local\\buff1")
-    #         buff2 = mmap.mmap(0, int(imageSize * 25), "Local\\buff2")
-    #         frameVect = []
-    #         read_flags = np.uint8
-    #         #fig = plt.figure(figsize=(10, 7))
-    #         #fig, ax_list = plt.subplots(1,1)
-
-    #         ##Preload
-    # #        img_x = []
-    # #        ax_list = ax_list.ravel()
-    # #
-    # #        for i in range(25):
-    # #            frameVect.append(buff2.read(int(imageSize)))
-    # #
-    # #        for i in range(25):
-    # #            image_conv = Image.frombuffer("L", [horz, vert],
-    # #                                         frameVect[i],
-    # #                                         'raw', 'L', 0, 1)
-    # #           # fig.add_subplot(5, 5, i + 1)
-    # #           img_x.append(ax_list[i].imshow(image_conv))
-    #         frameVect.clear()
-    #         plt.ion()
-    #         buff1.seek(0)
-    #         buff2.seek(0)
-
-    #         if self.singleMode:
-    #             myimg = plt.imshow(np.zeros([self.vert, self.horz]))
-    #             dst = Image.new('L', [self.horz, self.vert])
-    #         else:
-    #             if self.horz < 960:
-    #                 myimg = plt.imshow(np.zeros([self.vert*5, self.horz*5]))
-    #             else:
-    #                 myimg = plt.imshow(np.zeros([self.vert*2, self.horz*2]))
-    #             dst = Image.new('L', [self.horz * 5, self.vert * 5])
-
-    #         while self.live_running:
-    #             start = time.time()
-    #             # do stuff
-    #             read_flags = RW_flags.read_byte()
-    #             RW_flags.seek(0)
-    #             if read_flags & _constants.WRITING_BUFF1:
-    #                 logging.debug("BUFF2")
-    #                 read_flags |= _constants.READING_BUFF2
-    #                 #read_flags &= ~(READING_BUFF1)
-    #                 RW_flags.write_byte(read_flags)
-    #                 for i in range(25):
-    #                     frameVect.append(buff2.read(int(imageSize)))
-    #             else:
-    #                 logging.debug("BUFF1")
-    #                 read_flags |= _constants.READING_BUFF1
-    #                 #read_flags &= ~(READING_BUFF2)
-    #                 RW_flags.write_byte(read_flags)
-    #                 for i in range(25):
-    #                     frameVect.append(buff2.read(int(imageSize)))
-    #             RW_flags.seek(0)
-    #             read_flags &= ~(_constants.READING_BUFF1 | _constants.READING_BUFF2)
-    #             RW_flags.write_byte(read_flags)
-    #             RW_flags.seek(0)
-    #             buff1.seek(0)
-    #             buff2.seek(0)
-    #             logging.debug("Then length: ", len(frameVect[i]))
-    #             # RW_flags &= ~( READING_BUFF1 | READING_BUFF2 )
-
-    #             if self.singleMode:
-    #                 dst = Image.frombuffer("L", [self.horz, self.vert],
-    #                                               frameVect[self.singleCam - 1],
-    #                                               'raw', 'L', 0, 1)
-    #                 myimg.set_data(dst)
-    #             else:
-    #                 for i in range(25):
-    #                     image_conv = Image.frombuffer("L", [self.horz, self.vert],
-    #                                                   frameVect[i],
-    #                                                   'raw', 'L', 0, 1)
-    #                     dst.paste(image_conv, [self.horz * (i % 5), self.vert * ((i // 5 % 5))])
-
-    #                 if self.horz < 960:
-    #                     myimg.set_data(dst)
-    #                 else:
-    #                     myimg.set_data(dst.resize((self.horz*2, self.vert*2)))
-
-    #             #plt.axis('off')
-    #             #plt.show()
-    #             plt.pause(0.001)
-
-    #             if not self.live_running:
-    #                 plt.close()
-
-    #             frameVect.clear()
-    #             #time.sleep(0.001)
-    #             logging.debug("total time taken this loop: ", time.time() - start)
-    #         plt.close()
+            # self.m25_log.debug("ADDING IMAGE. LAYER DIDNT EXIST")
