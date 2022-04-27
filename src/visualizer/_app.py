@@ -41,13 +41,16 @@ class M25Communication:
     #Camera Globals
     horz: int = 808
     vert: int = 608
-    fps: int = 2
+    fps: np.float32 = 2
     exp: int = 250000
     bpp: int = 8
     capTime: int = 10
     z_frames: int = 0
     gain: float = 0.0
     flags: int = 0
+    lapse_count: int= 100
+    lapse_min: int = 1
+
     
     #Threading events
     # sleep_mutex = threading.Event()
@@ -71,9 +74,9 @@ class M25Communication:
         self.l_th = self.liveView_napari()
         self.l_th.yielded.connect(self.update_layer)
 
-    def _init_threads(self):
-        pass        
-        # self.l_th = threading.Thread(target=self.liveView_thread, args =(napari_viewer,))
+    # def _init_threads(self):
+    #     pass        
+    #     # self.l_th = threading.Thread(target=self.liveView_thread, args =(napari_viewer,))
     
     def client_thread(self):
     #time.sleep(2)
@@ -85,7 +88,9 @@ class M25Communication:
                 s.connect((self.HOST, self.PORT))
                 self.write_mutex.acquire()
                 values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime, self.path.encode(), self.proName.encode(), self.flags, self.gain)
-                packer = struct.Struct('L L L L L L L 255s 255s L d')
+                packer = struct.Struct('L L f L L L L 255s 255s L d')
+                # values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime,self.lapse_min,self.lapse_count, self.path.encode(), self.proName.encode(), self.flags, self.gain)
+                # packer = struct.Struct('L L L L L L L L L 255s 255s L d')
                 packed_data = packer.pack(*values)
                 s.sendall(packed_data)
                 # logging.debug('flags: %d' % int(self.flags))                    
@@ -101,13 +106,27 @@ class M25Communication:
                     (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,
                         rec_path, rec_proName,
                         rec_flags, rec_gain) = unpack(
-                        'L L L L L L L'
+                        'L L f L L L L'
                         '255s'
                         '255s'
                         'L'
                         'd',
                         data
-                    )
+                    )                   
+                    # data: bytes = s.recv(1024)
+                    # (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,\
+                    #     rec_lapse_min, rec_lapse_count,\
+                    #     rec_path, rec_proName,\
+                    #     rec_flags, rec_gain) = unpack(
+                    #     'L L L L L L L L L'
+                    #     '255s'
+                    #     '255s'
+                    #     'L'
+                    #     'd',
+                    #     data
+                    # )
+
+                    # self.m25_log.debug("receiving:{}".format(data.size()))
             #pathStr = convert(rec_path)
                 # logging.debug('Received horz: %d' % int(rec_horz))
                 # logging.debug('Received vert: %d' % int(rec_vert))
@@ -136,11 +155,11 @@ class M25Communication:
                 self.m25_log.debug("IT's ALIVEEEEEE")
                 self.live_running = True
                 # Create Memory Maps
-                imageSize = np.uint64((self.horz * self.vert) / 8 * self.bpp)
+                imageSize = np.uint64(((self.horz * self.vert) / 8 )* self.bpp)
                 # adhearing to sector aligned memory
                 if imageSize % 512 != 0:
                     imageSize += (512 - (imageSize % 512))
-                imgObj = np.dtype(np.uint8, imageSize)
+                # imgObj = np.dtype(np.uint8, imageSize)
                 RW_flags = mmap.mmap(0, 8, "Local\\Flags")  # for basic signaling
                 buff1 = mmap.mmap(0, int(imageSize * 25), "Local\\buff1")
                 buff2 = mmap.mmap(0, int(imageSize * 25), "Local\\buff2")
@@ -233,7 +252,7 @@ class M25Communication:
         """
         try:
             self.napari_viewer.layers['M25_cam'].data = image
-            time.sleep(0.001)
+            time.sleep(0.003)
             # self.m25_log.debug("NEW FRAME IN")
         except KeyError:
             self.napari_viewer.add_image(image, name='M25_cam')

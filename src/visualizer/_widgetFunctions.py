@@ -56,12 +56,14 @@ class M25Controls(QWidget):
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
-        self.path = "D:"   #TODO: change to a more default folder later
+        #TODO: change to a more default folder later
+        self.path = r'D:\Test'
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
         self.ui.PNameLineEdit.setText(self.proName)
         self.onlyInt = QtGui.QIntValidator()
+        self.onlyFloats = QtGui.QDoubleValidator()
         self.ui.radioButton.toggled.connect(self.onClicked)
         self.ui.radioButton.value = 8
         self.ui.radioButton_2.toggled.connect(self.onClicked)
@@ -74,7 +76,7 @@ class M25Controls(QWidget):
         self.ui.VertLineEdit.setValidator(self.onlyInt)
         self.ui.FPSLineEdit.setText(str(self.M25app.fps))
         self.ui.FPSLineEdit.editingFinished.connect(self.sync_FPSLineEdit)
-        self.ui.FPSLineEdit.setValidator(self.onlyInt)
+        self.ui.FPSLineEdit.setValidator(self.onlyFloats)
         self.ui.EXPLineEdit.setText(str(self.M25app.exp))
         self.ui.EXPLineEdit.editingFinished.connect(self.sync_EXPLineEdit)
         self.ui.EXPLineEdit.setValidator(self.onlyInt)
@@ -219,9 +221,9 @@ class M25Controls(QWidget):
         text = self.ui.FPSLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
-            self.M25app.fps = int(text)
+            self.M25app.fps = np.float32(text)
         else:
-            self.M25app.fps = (0)
+            self.M25app.fps = np.float32(0)
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
@@ -299,7 +301,7 @@ class M25Controls(QWidget):
             pass
         else:
             self.M25app.flags |= _constants.CHANGE_CONFIG
-            self.m25_log.debug("FPS {}, Gain {}, CapTime{}".format( int(self.ui.FPSLineEdit.text()),
+            self.m25_log.debug("FPS {}, Gain {}, CapTime{}".format( np.float32(self.ui.FPSLineEdit.text()),
                                                                 float(self.ui.GainlineEdit.text()),
                                                                 int(self.ui.CapTimeLineEdit.text())))
         self.M25app.write_mutex.release()
@@ -313,6 +315,7 @@ class M25Controls(QWidget):
             self.M25app.flags |= _constants.RELEASE_CAMERAS
             self.m25_log.info("Cameras Released")
             self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
+
         self.M25app.write_mutex.release()
     
     @pyqtSlot()  
