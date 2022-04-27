@@ -55,7 +55,7 @@ class M25Controls(QWidget):
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
-        self.path = "E:\Ed"   #TODO: change to a more default folder later
+        self.path = "F:\Ed"   #TODO: change to a more default folder later
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
@@ -108,14 +108,12 @@ class M25Controls(QWidget):
         self.ui.loadBtn.clicked.connect(self.load_dataset)
      
         self.start_logging()
-    
         self._start_cmd()
         self._start_threads()
     
     def initialize(self):
         self.ui = M25GUI.Ui_Form()
         self.ui.setupUi(self)
-        
         logging.info('Initializing Comm')
         #Initialize the Qt GUI and the M25 Communications
         self.M25app = M25Communication(self.viewer)
@@ -131,8 +129,8 @@ class M25Controls(QWidget):
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
         logging.getLogger().addHandler(log_box)
         #Change logging to INFO or DEBUG to see all log (info,debug,warning)
-        logging.getLogger().setLevel(logging.DEBUG)
-        # logging.getLogger().setLevel(logging.INFO)
+        # logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
 
     def _start_cmd(self):
             # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 

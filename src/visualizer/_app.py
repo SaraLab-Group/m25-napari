@@ -1,5 +1,6 @@
 # import sys
 # import binascii
+from queue import Empty
 import threading
 import time
 import struct
@@ -128,6 +129,7 @@ class M25Communication:
     def liveView_napari(self):
         while self.run:
             self.sleep_mutex.wait(None)
+            logging.info("sleepmutex")
             if self.run:
                 logging.debug("IT's ALIVEEEEEE")
                 self.live_running = True
@@ -155,6 +157,7 @@ class M25Communication:
                     # layer = napari_viewer.add_image(np.zeros(imgshape))
                     yield np.array(dst)
                 else:
+                    logging.info("LIVE MODE INIT")
                     if self.horz < 960:
                         # myimg = plt.imshow(np.zeros([self.vert*5, self.horz*5]))
                         myimg = np.zeros(imgshape)
@@ -214,9 +217,11 @@ class M25Communication:
                     #time.sleep(0.001)
                     # logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
                 
-                # Send blank layer
-                dst =[]
-                yield np.array(dst)
+                if not dst:
+                    # Send blank layer
+                    logging.debug("Not empty")
+                    dst =[]
+                    yield np.array(dst)
     
     def update_layer(self, image):
         """[summary]
