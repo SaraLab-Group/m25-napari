@@ -1,6 +1,7 @@
 
 import sys
 import os
+from this import d
 import psutil
 # import binascii
 # import threading
@@ -23,7 +24,7 @@ import sys
 from datetime import date
 from lib2to3.pytree import convert
 from struct import unpack
-import socket
+# import socket
 from subprocess import call
 
 from ctypes import *
@@ -55,12 +56,14 @@ class M25Controls(QWidget):
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
-        self.path = "E:\Ed"   #TODO: change to a more default folder later
+        #TODO: change to a more default folder later
+        self.path = r'D:\Test'
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
         self.ui.PNameLineEdit.setText(self.proName)
         self.onlyInt = QtGui.QIntValidator()
+        self.onlyFloats = QtGui.QDoubleValidator()
         self.ui.radioButton.toggled.connect(self.onClicked)
         self.ui.radioButton.value = 8
         self.ui.radioButton_2.toggled.connect(self.onClicked)
@@ -73,7 +76,7 @@ class M25Controls(QWidget):
         self.ui.VertLineEdit.setValidator(self.onlyInt)
         self.ui.FPSLineEdit.setText(str(self.M25app.fps))
         self.ui.FPSLineEdit.editingFinished.connect(self.sync_FPSLineEdit)
-        self.ui.FPSLineEdit.setValidator(self.onlyInt)
+        self.ui.FPSLineEdit.setValidator(self.onlyFloats)
         self.ui.EXPLineEdit.setText(str(self.M25app.exp))
         self.ui.EXPLineEdit.editingFinished.connect(self.sync_EXPLineEdit)
         self.ui.EXPLineEdit.setValidator(self.onlyInt)
@@ -106,20 +109,24 @@ class M25Controls(QWidget):
         self.ui.SingleCamCheckBox.stateChanged.connect(self.singleClicked)
         self.ui.exitBtn.clicked.connect(self.cleanup_M25Plugin)
         self.ui.loadBtn.clicked.connect(self.load_dataset)
-     
-        self.start_logging()
+        self.ui.toggleDM.clicked.connect(self.control_DM)
+        self.ui.toggleLED.clicked.connect(self.control_LED)
+        # self.start_logging()
     
-        self._start_cmd()
-        self._start_threads()
+
     
     def initialize(self):
         self.ui = M25GUI.Ui_Form()
         self.ui.setupUi(self)
-        
+        self.start_logging()
+
+        #TODO: make sure live thread is paused before M25 initalization
         logging.info('Initializing Comm')
         #Initialize the Qt GUI and the M25 Communications
         self.M25app = M25Communication(self.viewer)
-        self.M25app._init_threads()
+        self._start_cmd()
+        self._start_threads()
+        # self.M25app._init_threads()
 
         
         ### Initialize M25 app communication file and globals
@@ -129,18 +136,20 @@ class M25Controls(QWidget):
         ## Logging
         log_box = QtLogger(self.ui.logTextBox)
         log_box.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
-        logging.getLogger().addHandler(log_box)
+        self.m25_log = logging.getLogger('m25_logger')
+        self.m25_log.addHandler(log_box)
         #Change logging to INFO or DEBUG to see all log (info,debug,warning)
-        logging.getLogger().setLevel(logging.DEBUG)
+        self.m25_log.setLevel(logging.DEBUG)
         # logging.getLogger().setLevel(logging.INFO)
 
     def _start_cmd(self):
             # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
-        # self.exe_path = r'C:\Users\Callisto\Documents\abajor\M25_basler\basler_candidate\ide\x64\Debug'
-        self.exe_path = os.path.dirname(__file__)
+        self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Debug'
+        # self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Release'
+        # self.exe_path = os.path.dirname(__file__)
         # self.exe_path = os.path.join(dirname,'')
-        self.myEXE = "Basler_Candidate.exe"
-        logging.debug(str(self.exe_path))
+        self.myEXE = "m25_FLIR.exe"
+        self.m25_log.debug(str(self.exe_path))
         self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
         # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
     
@@ -148,6 +157,8 @@ class M25Controls(QWidget):
         self.M25app.th.start()
         # self.M25app.l_th.finished.connect(self.ui.exitBtn.clicked)
         self.M25app.l_th.start()
+        self.M25app.l_th.pause()
+
                
     ### Define the Signal Functions
     @pyqtSlot(bool)
@@ -156,7 +167,7 @@ class M25Controls(QWidget):
         radioButton = self.sender()
         if radioButton.isChecked():
             self.M25app.bpp = (radioButton.value)
-            logging.debug("Button Value bpp: %d" % (radioButton.value))
+            # self.m25_log.debug("Button Value bpp: %d" % (radioButton.value))
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
@@ -210,9 +221,9 @@ class M25Controls(QWidget):
         text = self.ui.FPSLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
-            self.M25app.fps = int(text)
+            self.M25app.fps = np.float32(text)
         else:
-            self.M25app.fps = (0)
+            self.M25app.fps = np.float32(0)
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
@@ -272,24 +283,25 @@ class M25Controls(QWidget):
     
     @pyqtSlot()
     def AcquireState(self):
-        logging.debug("Acquire State")
-        logging.debug("flags{}".format(self.M25app.flags))
+        self.m25_log.debug("Acquire State")
+        self.m25_log.debug("flags{}".format(self.M25app.flags))
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED or self.M25app.flags & _constants.CAPTURING:
             pass
         else:
             self.M25app.flags |= _constants.ACQUIRE_CAMERAS
         self.M25app.write_mutex.release()
+        
     @pyqtSlot()
     def ConfState(self):
-        logging.debug("Conf State")
-        logging.debug("flags: {}".format(str(hex(self.M25app.flags))))
+        self.m25_log.debug("Conf State")
+        self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAPTURING or self.M25app.flags & _constants.ACQUIRING_CAMERAS or self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             pass
         else:
             self.M25app.flags |= _constants.CHANGE_CONFIG
-            logging.debug("FPS {}, Gain {}, CapTime{}".format( int(self.ui.FPSLineEdit.text()),
+            self.m25_log.debug("FPS {}, Gain {}, CapTime{}".format( np.float32(self.ui.FPSLineEdit.text()),
                                                                 float(self.ui.GainlineEdit.text()),
                                                                 int(self.ui.CapTimeLineEdit.text())))
         self.M25app.write_mutex.release()
@@ -301,11 +313,14 @@ class M25Controls(QWidget):
             pass
         else:
             self.M25app.flags |= _constants.RELEASE_CAMERAS
+            self.m25_log.info("Cameras Released")
+            self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
+
         self.M25app.write_mutex.release()
     
     @pyqtSlot()  
     def CaptureState(self):
-        logging.debug("CAPTURE Pressed")
+        self.m25_log.debug("CAPTURE Pressed")
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             if self.M25app.flags &_constants.CAPTURING:
@@ -314,43 +329,50 @@ class M25Controls(QWidget):
                 if self.M25app.zMode == True:
                     self.M25app.flags |= _constants.START_Z_STACK
                 else:
-                    logging.debug("CAPTURE STARTED")
+                    self.m25_log.info("CAPTURE STARTED")
                     self.M25app.flags |= _constants.START_CAPTURE
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
     def toggleLive(self):
         self.M25app.write_mutex.acquire()
-        logging.debug("LIVE PRESS")
-        logging.debug("Live Running %d", self.M25app.live_running)
+        self.m25_log.debug("LIVE PRESS")
+        self.m25_log.info("Live Running %d", self.M25app.live_running)
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED:
             if self.M25app.flags & _constants.CAPTURING:
                 pass
             elif self.M25app.live_running:
-                logging.debug("STOPPING LIVE")
+                self.m25_log.info("STOPPING LIVE")
                 self.M25app.live_running = False
                 self.M25app.flags |= _constants.STOP_LIVE
                 self.M25app.flags &= ~(_constants.LIVE_RUNNING)
-                self.M25app.sleep_mutex.clear()
+                # self.M25app.sleep_mutex.clear()
+                self.M25app.l_th.pause()
+                self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
             else:
                 self.M25app.live_running = True
+                self.m25_log.info("LIVE RUNNING")
                 self.M25app.flags |= _constants.START_LIVE
-                self.M25app.sleep_mutex.set()
+                # self.M25app.sleep_mutex.set()
+                self.M25app.l_th.resume()
+                self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
     def cleanup_M25Plugin(self):
-        logging.info("CLOSING STARTED")
+        self.m25_log.info("CLOSING STARTED")
         self.M25app.write_mutex.acquire()
         self.M25app.flags |= _constants.EXIT_THREAD
         self.M25app.write_mutex.release()
-        logging.debug('close event fired')
+        self.m25_log.debug('close event fired')
         time.sleep(0.2)
         self.M25app.run = False
         self.M25app.live_running = False
-        self.M25app.sleep_mutex.set()
+        # self.M25app.sleep_mutex.set()
         self.M25app.th.join()
-        # self.M25app.l_th.join   #Since it is a Napari Worker then 
+        self.M25app.l_th.pause()
+        self.M25app.l_th.quit()   #Since it is a Napari Worker then use their cleanup 
+
         time.sleep(0.2)
         self.viewer.window.remove_dock_widget(self)
 
@@ -364,9 +386,22 @@ class M25Controls(QWidget):
         except: 
             stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=600, width =960)
         self.viewer.add_image(stack)
+    
+    
+    @pyqtSlot()
+    def control_LED(self):
+        self.m25_log.debug("Toggle LED Pressed")
+        self.M25app.write_mutex.acquire()
+        self.M25app.flags |= _constants.TOGGLE_LED
+        self.M25app.write_mutex.release()
 
-
-
+    @pyqtSlot()
+    def control_DM(self):
+        self.m25_log.debug("Toggle Digital Modulation Pressed")
+        self.M25app.write_mutex.acquire()
+        self.M25app.flags |= _constants.TOGGLE_DIG_MOD
+        self.M25app.write_mutex.release()
+        
 ## Adopted from Todd Vanyo's https://stackoverflow.com/questions/28655198/best-way-to-display-logs-in-pyqt
 # Linking Napari Log to our logger
 # Adopted from Cam's' RecOrder

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1026</width>
-    <height>845</height>
+    <height>740</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -20,124 +20,6 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="6" column="3">
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QPushButton" name="CapturePushButton">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>17</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">
-background-color: rgb(0, 170, 0);</string>
-       </property>
-       <property name="text">
-        <string>Capture</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="LiveButton">
-       <property name="styleSheet">
-        <string notr="true">background-color: rgb(0, 170, 255);</string>
-       </property>
-       <property name="text">
-        <string>Live</string>
-       </property>
-      </widget>
-     </item>
-     <item alignment="Qt::AlignRight">
-      <widget class="QCheckBox" name="SingleCamCheckBox">
-       <property name="text">
-        <string>Single Cam</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item alignment="Qt::AlignRight">
-      <widget class="QSpinBox" name="CamSpinBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>165</width>
-         <height>15</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="CamSelectLabel">
-       <property name="text">
-        <string>Cam Select</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="5" column="3">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="ConfButton">
-       <property name="text">
-        <string>SetConf</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="AcquireCamsButton">
-       <property name="text">
-        <string>AcqCams</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="ReleaseCamsButton">
-       <property name="text">
-        <string>FreeCams</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="1" column="3">
-    <widget class="QLabel" name="ResolutionLabel">
-     <property name="font">
-      <font>
-       <pointsize>10</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Resolution</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="3" rowspan="3">
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="1">
@@ -375,35 +257,81 @@ background-color: rgb(0, 170, 0);</string>
      </item>
     </layout>
    </item>
-   <item row="8" column="3">
-    <layout class="QVBoxLayout" name="verticalLayout_13">
+   <item row="6" column="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="MsgLabel">
+      <widget class="QPushButton" name="CapturePushButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>17</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">
+background-color: rgb(0, 170, 0);</string>
+       </property>
        <property name="text">
-        <string>Messages:</string>
+        <string>Capture</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="widgetResizable">
+      <widget class="QPushButton" name="LiveButton">
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(0, 170, 255);</string>
+       </property>
+       <property name="text">
+        <string>Live</string>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignRight">
+      <widget class="QCheckBox" name="SingleCamCheckBox">
+       <property name="text">
+        <string>Single Cam</string>
+       </property>
+       <property name="checkable">
         <bool>true</bool>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents_3">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>1004</width>
-          <height>423</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QPlainTextEdit" name="logTextBox"/>
-         </item>
-        </layout>
-       </widget>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item alignment="Qt::AlignRight">
+      <widget class="QSpinBox" name="CamSpinBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>165</width>
+         <height>15</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="CamSelectLabel">
+       <property name="text">
+        <string>Cam Select</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -460,6 +388,57 @@ background-color: rgb(0, 170, 0);</string>
      </item>
     </layout>
    </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="ResolutionLabel">
+     <property name="font">
+      <font>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Resolution</string>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="3">
+    <layout class="QVBoxLayout" name="verticalLayout_13">
+     <item>
+      <widget class="QLabel" name="MsgLabel">
+       <property name="text">
+        <string>Messages:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>1004</width>
+          <height>287</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QPlainTextEdit" name="logTextBox">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="7" column="3">
     <widget class="QPushButton" name="loadBtn">
      <property name="styleSheet">
@@ -469,6 +448,56 @@ background-color: rgb(0, 170, 0);</string>
       <string>Load Dataset</string>
      </property>
     </widget>
+   </item>
+   <item row="5" column="3">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="ConfButton">
+       <property name="text">
+        <string>SetConf</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="AcquireCamsButton">
+       <property name="text">
+        <string>AcqCams</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="ReleaseCamsButton">
+       <property name="text">
+        <string>FreeCams</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="9" column="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QPushButton" name="toggleLED">
+       <property name="text">
+        <string>Toggle LED</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="toggleDM">
+       <property name="text">
+        <string>Toggle Digital Modulation</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="testBtn">
+       <property name="text">
+        <string>Test me</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
