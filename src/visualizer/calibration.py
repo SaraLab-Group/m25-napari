@@ -10,15 +10,39 @@ from skimage.io.collection import alphanumeric_key
 from dask import delayed
 from glob import glob
 from skimage import io
-
+import dask
 import dask.array as da
 
+@dask.delayed
+# Read RAW files and return Dask Array
+def lazy_imread_raw(raw_file, width=960, height=600, px_size='uint8'):
+    raw_img = np.fromfile(raw_file, dtype= px_size)
+    raw_reshape =np.reshape(raw_img,(1,height,width))
+    return raw_reshape
 
-def load_dataset(main_folder,px_depth='uint16'):
+def lazy_dask_stack(main_folder,num_cams=25, px_depth='uint16', height=600, width =960):
+    folder_names = sorted(glob(main_folder + '/CAM*/'), key=alphanumeric_key)
+    offset = np.floor(num_cams/2).astype(np.uint8)
+    da_stack=[]
+    
+    for folder_name in folder_names[12-offset:offset+12]:
+        file_extension = folder_name + '/' + '*.raw'
+        file_names = sorted(glob(file_extension),key=alphanumeric_key)
+        sample =np.fromfile(file_names[0],dtype=px_depth)
+        raw_reshape =np.reshape(sample,(1,height,width))
+        lazy_arrays = [lazy_imread_raw(fn,width,height,px_depth) for fn in file_names]
+        dask_arrays = [da.from_delayed(delayed_reader, shape=raw_reshape.shape,dtype=raw_reshape.dtype) for delayed_reader in lazy_arrays]
+        # stack = da.concatenate(dask_arrays, axis=1)
+        da_stack.append(dask_arrays)
+    stack = da.concatenate(da_stack,axis=1)
+    return stack 
+
+def load_dataset(main_folder,num_cams=25,px_depth='uint16'):
     # px_depth = 'uint16'
     # px_depth = 'uint8'
     folder_names = sorted(glob(main_folder + '/CAM*/'), key=alphanumeric_key)
-    raw_M25_volume = [dask_raw_ds(fd,px_depth) for fd in folder_names]
+    offset = np.floor(num_cams/2).astype(np.uint8)
+    raw_M25_volume = [dask_raw_ds(fd,px_depth) for fd in folder_names[12-offset:offset+12]]
     stack = da.concatenate(raw_M25_volume, axis=1)
     return stack
 
