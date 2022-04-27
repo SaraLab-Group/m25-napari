@@ -270,6 +270,9 @@ class Ui_Form(object):
         self.toggleDM = QtWidgets.QPushButton(Form)
         self.toggleDM.setObjectName("toggleDM")
         self.horizontalLayout_5.addWidget(self.toggleDM)
+        self.testBtn = QtWidgets.QPushButton(Form)
+        self.testBtn.setObjectName("testBtn")
+        self.horizontalLayout_5.addWidget(self.testBtn)
         self.gridLayout_2.addLayout(self.horizontalLayout_5, 9, 3, 1, 1)
 
         self.retranslateUi(Form)
@@ -307,3 +310,4 @@ class Ui_Form(object):
         self.ReleaseCamsButton.setText(_translate("Form", "FreeCams"))
         self.toggleLED.setText(_translate("Form", "Toggle LED"))
         self.toggleDM.setText(_translate("Form", "Toggle Digital Modulation"))
+        self.testBtn.setText(_translate("Form", "Test me"))
