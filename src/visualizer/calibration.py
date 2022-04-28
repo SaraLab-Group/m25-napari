@@ -25,7 +25,7 @@ def lazy_dask_stack(main_folder,num_cams=25, px_depth='uint16', height=600, widt
     offset = np.floor(num_cams/2).astype(np.uint8)
     da_stack=[]
     
-    for folder_name in folder_names[12-offset:offset+12]:
+    for folder_name in folder_names[12-offset:offset+13]:
         file_extension = folder_name + '/' + '*.raw'
         file_names = sorted(glob(file_extension),key=alphanumeric_key)
         sample =np.fromfile(file_names[0],dtype=px_depth)
@@ -37,25 +37,30 @@ def lazy_dask_stack(main_folder,num_cams=25, px_depth='uint16', height=600, widt
     stack = da.concatenate(da_stack,axis=1)
     return stack 
 
-def load_dataset(main_folder,num_cams=25,px_depth='uint16'):
-    # px_depth = 'uint16'
-    # px_depth = 'uint8'
+def load_dataset(main_folder,num_cams=25,px_depth='uint16',width=808,height=608):
     folder_names = sorted(glob(main_folder + '/CAM*/'), key=alphanumeric_key)
     offset = np.floor(num_cams/2).astype(np.uint8)
-    raw_M25_volume = [dask_raw_ds(fd,px_depth) for fd in folder_names[12-offset:offset+12]]
+    raw_M25_volume = [dask_raw_ds(fd,px_depth,width=width, height=height) for fd in folder_names[12-offset:offset+13]]
     stack = da.concatenate(raw_M25_volume, axis=1)
     return stack
 
 # Read RAW files and return Dask Array
-def imread_raw(raw_file, width=960, height=600, px_size='uint16'):
+def imread_raw(raw_file, width=808, height=608, px_size='uint16'):
     raw_img = np.fromfile(raw_file, dtype= px_size)
+    #Parse data from the raw which contains padding if sensor array size is not 
+    #divisible by 512. Sector aligned 
+    if px_size == 'uint16':
+        raw_size = raw_img.shape[0]-((raw_img.shape[0]-(width*height))*16/8)
+    else:
+        raw_size= raw_img.shape[0]-((raw_img.shape[0]-(width*height)))
+    raw_img = raw_img[0:int(raw_size)] 
     raw_reshape =np.reshape(raw_img,(1,height,width))
     return da.from_array(raw_reshape)
 
-def dask_raw_ds(folder_name,px_depth):
+def dask_raw_ds(folder_name,px_depth,width=808,height=608):
     file_extension = folder_name + '/' + '*.raw'
     file_names = sorted(glob(file_extension),key=alphanumeric_key)
-    raw_ds = [ imread_raw(fn,960,600,px_size= px_depth) for fn in file_names]
+    raw_ds = [ imread_raw(fn,width=width,height=height,px_size= px_depth) for fn in file_names]
     # dask_raw_ds = da.stack(raw_ds,axis=1)
     return raw_ds
 
