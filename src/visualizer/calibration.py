@@ -16,7 +16,14 @@ import dask.array as da
 @dask.delayed
 # Read RAW files and return Dask Array
 def lazy_imread_raw(raw_file, width=960, height=600, px_size='uint8'):
+    #Parse data from the raw which contains padding if sensor array size is not 
+    #divisible by 512. Sector aligned 
     raw_img = np.fromfile(raw_file, dtype= px_size)
+    if px_size == 'uint16':
+        raw_size = raw_img.shape[0]-((raw_img.shape[0]-(width*height))*16/8)
+    else:
+        raw_size= raw_img.shape[0]-((raw_img.shape[0]-(width*height)))
+    raw_img = raw_img[0:int(raw_size)] 
     raw_reshape =np.reshape(raw_img,(1,height,width))
     return raw_reshape
 
