@@ -59,7 +59,7 @@ class M25Controls(QWidget):
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
         #TODO: change to a more default folder later
-        self.path = r'D:\Test'
+        self.path = r'H:\Test'
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
@@ -384,9 +384,9 @@ class M25Controls(QWidget):
         loading_path= str(QFileDialog.getExistingDirectory(self, "Select Directory",self.M25app.path))
         # main_folder = os.path.join(self.M25app.path, self.filename)
         try:
-            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint8', height=600, width =960)
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint8', height=608, width =808)
         except: 
-            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=600, width =960)
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=608, width =808)
         self.viewer.add_image(stack)
     
     
