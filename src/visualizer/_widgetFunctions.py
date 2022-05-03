@@ -10,9 +10,6 @@ import struct
 import mmap
 import math
 import signal
-from PyQt5 import QtWidgets
-from PyQt5 import QWaitCondition
-from PyQt5 import QMutex
 from matplotlib import pyplot as plt
 from psutil import Popen
 from napari._qt.qt_main_window import _QtMainWindow
@@ -36,6 +33,8 @@ from typing import Any, Tuple
 from PyQt5.QtCore import pyqtSlot, pyqtSignal, QObject
 from PyQt5.QtWidgets import QAction, QWidget, QFileDialog
 from PyQt5 import QtGui
+
+# from PyQt5.QtCore import QMutex, QWaitCondition
 
 from visualizer.Qt import M25GUI
 from visualizer._app import M25Communication
@@ -160,7 +159,6 @@ class M25Controls(QWidget):
         # self.M25app.l_th.finished.connect(self.ui.exitBtn.clicked)
         self.M25app.l_th.start()
         self.M25app.l_th.pause()
-
                
     ### Define the Signal Functions
     @pyqtSlot(bool)
@@ -349,14 +347,15 @@ class M25Controls(QWidget):
                 self.M25app.flags |= _constants.STOP_LIVE
                 self.M25app.flags &= ~(_constants.LIVE_RUNNING)
                 # self.M25app.sleep_mutex.clear()
-                #self.M25app.l_th.pause()
+                self.M25app.l_th.pause()
                 self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
             else:
                 self.M25app.live_running = True
                 self.m25_log.info("LIVE RUNNING")
                 self.M25app.flags |= _constants.START_LIVE
                 # self.M25app.sleep_mutex.set()
-                self.M25app.live_sleep.wake_one()
+                self.M25app.l_th.resume()
+                # self.M25app.live_sleep.wakeOne()
                 self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.release()
     
