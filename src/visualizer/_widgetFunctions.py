@@ -47,7 +47,7 @@ import visualizer.calibration as calibration
 class M25Controls(QWidget):   
     def __init__(self,napari_viewer:Viewer):
         super().__init__()
-        
+        self._start_cmd()
         self.M25app = None
         # self.worker_client = None
         # self.worker_liveV = None 
@@ -58,7 +58,7 @@ class M25Controls(QWidget):
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
         #TODO: change to a more default folder later
-        self.path = r'H:\Test'
+        self.path = r'H:/Test'
         
          ### Setup the UI and function connections
         self.ui.WritePLineEdit.setText(self.path)
@@ -122,14 +122,13 @@ class M25Controls(QWidget):
         self.start_logging()
 
         #TODO: make sure live thread is paused before M25 initalization
-        logging.info('Initializing Comm')
+        self.m25_log.info('Initializing Comm')
         #Initialize the Qt GUI and the M25 Communications
+        # self._start_cmd()
         self.M25app = M25Communication(self.viewer)
-        self._start_cmd()
         self._start_threads()
         # self.M25app._init_threads()
 
-        
         ### Initialize M25 app communication file and globals
         self.M25app.bpp = 8
         
@@ -144,13 +143,13 @@ class M25Controls(QWidget):
         # logging.getLogger().setLevel(logging.INFO)
 
     def _start_cmd(self):
-            # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
-        self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Debug'
-        # self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Release'
+        # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
+        # self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Debug'
+        self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Release'
         # self.exe_path = os.path.dirname(__file__)
         # self.exe_path = os.path.join(dirname,'')
         self.myEXE = "m25_FLIR.exe"
-        self.m25_log.debug(str(self.exe_path))
+        # self.m25_log.debug(str(self.exe_path))
         self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
         # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
     
@@ -347,6 +346,7 @@ class M25Controls(QWidget):
                 self.M25app.flags |= _constants.STOP_LIVE
                 self.M25app.flags &= ~(_constants.LIVE_RUNNING)
                 # self.M25app.sleep_mutex.clear()
+                time.sleep(2)
                 self.M25app.l_th.pause()
                 self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
             else:
@@ -379,14 +379,21 @@ class M25Controls(QWidget):
 
     @pyqtSlot()
     def load_dataset(self):
+        #Scope Parameters
+        # FOV = 50e-6
+        cam_px = 6.0e-6
+        totalmag = 15.75
+        px_size_img = cam_px/totalmag
+        zstep = 2e-6
+        z_scale = zstep/px_size_img
+
         #TODO Add calibration.py to package or make loading separate package
         loading_path= str(QFileDialog.getExistingDirectory(self, "Select Directory",self.M25app.path))
-        # main_folder = os.path.join(self.M25app.path, self.filename)
-        try:
-            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint8', height=608, width =808)
-        except: 
-            stack = calibration.lazy_dask_stack(loading_path,num_cams=25, px_depth='uint16', height=608, width =808)
-        self.viewer.add_image(stack)
+        if self.M25app.bpp > 8 :
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=3, px_depth='uint16', height=self.M25app.vert, width =self.M25app.horz)
+        else:
+            stack = calibration.lazy_dask_stack(loading_path,num_cams=3, px_depth='uint8', height=self.M25app.vert, width =self.M25app.horz)
+        self.viewer.add_image(stack,scale=[z_scale,1,1], multiscale=False)
     
     
     @pyqtSlot()

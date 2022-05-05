@@ -36,7 +36,13 @@ def lazy_dask_stack(main_folder,num_cams=25, px_depth='uint16', height=600, widt
         file_extension = folder_name + '/' + '*.raw'
         file_names = sorted(glob(file_extension),key=alphanumeric_key)
         sample =np.fromfile(file_names[0],dtype=px_depth)
+        if px_depth == 'uint16':
+            raw_size = sample.shape[0]-((sample.shape[0]-(width*height))*16/8)
+        else:
+            raw_size= sample.shape[0]-((sample.shape[0]-(width*height)))
+        sample = sample[0:int(raw_size)] 
         raw_reshape =np.reshape(sample,(1,height,width))
+        delayed(lazy_imread_raw)
         lazy_arrays = [lazy_imread_raw(fn,width,height,px_depth) for fn in file_names]
         dask_arrays = [da.from_delayed(delayed_reader, shape=raw_reshape.shape,dtype=raw_reshape.dtype) for delayed_reader in lazy_arrays]
         # stack = da.concatenate(dask_arrays, axis=1)

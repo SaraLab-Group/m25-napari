@@ -44,12 +44,12 @@ class M25Communication:
     #Camera Globals
     horz: int = 808
     vert: int = 608
-    fps: np.float32 = 2
-    exp: int = 250000
+    fps: np.float32 = 40
+    exp: int = 20000
     bpp: int = 8
-    capTime: int = 10
+    capTime: int = 15
     z_frames: int = 0
-    gain: float = 0.0
+    gain: float = 15.0
     flags: int = 0
     lapse_count: int= 100
     lapse_min: int = 1
@@ -161,7 +161,7 @@ class M25Communication:
             # self.live_sleep.wait(self.sleep_mtx)
             # self.sleep_mtx.unlock()
             
-            if self.run:
+            if self.run and self.live_running:
                 self.m25_log.debug("IT's ALIVEEEEEE")
                 self.live_running = True
                 # Create Memory Maps
@@ -198,21 +198,21 @@ class M25Communication:
                     # yield np.array(dst)
 
                 while self.live_running:
-                    # self.m25_log.debug("LIVE RUNNING SETUP")
+                    self.m25_log.debug("LIVE RUNNING SETUP")
                     # self.m25_log.debug("live_running flag: {}".format(self.live_running))
                     # start = time.time()
                     read_flags = RW_flags.read_byte()
                     # logging.debug("FLAG"+ str(read_flags))
                     RW_flags.seek(0)
                     if read_flags & _constants.WRITING_BUFF1:
-                        # logging.debug("BUFF2")
+                        self.m25_log.debug("BUFF2")
                         read_flags |= _constants.READING_BUFF2
                         #read_flags &= ~(READING_BUFF1)
                         RW_flags.write_byte(read_flags)
                         for i in range(25):
                             frameVect.append(buff2.read(int(imageSize)))
                     else:
-                        # logging.debug("BUFF1")
+                        self.m25_log.debug("BUFF1")
                         read_flags |= _constants.READING_BUFF1
                         #read_flags &= ~(READING_BUFF2)
                         RW_flags.write_byte(read_flags)
@@ -241,6 +241,8 @@ class M25Communication:
                                                         frameVect[i],
                                                         'raw', 'L', 0, 1)
                             dst.paste(image_conv, [self.horz * (i % 5), self.vert * ((i // 5 % 5))])
+                        self.m25_log.debug("before yield")
+
                         yield np.array(dst)
 
                     if not self.live_running:
@@ -249,7 +251,11 @@ class M25Communication:
                     frameVect.clear()
                     #time.sleep(0.001)
                     # logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
-
+                
+                RW_flags.close()
+                buff1.close()
+                buff2.close()
+                
                 # Send blank layer
                 # dst =[]
                 # yield np.array(dst)
@@ -265,5 +271,5 @@ class M25Communication:
             time.sleep(0.003)
             # self.m25_log.debug("NEW FRAME IN")
         except KeyError:
-            self.napari_viewer.add_image(image, name='M25_cam')
+            self.napari_viewer.add_image(image, name='M25_cam',multiscale=False)
             # self.m25_log.debug("ADDING IMAGE. LAYER DIDNT EXIST")
