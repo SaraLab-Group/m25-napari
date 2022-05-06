@@ -40,6 +40,7 @@ class M25Communication:
     zMode = False
     singleMode = False
     singleCam = 13
+    timeLapseMode = False
     
     #Camera Globals
     horz: int = 808

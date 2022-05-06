@@ -61,8 +61,8 @@ class M25Controls(QWidget):
         self.path = r'H:/Test'
         
          ### Setup the UI and function connections
-        self.ui.WritePLineEdit.setText(self.path)
-        self.ui.PNameLineEdit.setText(self.proName)
+        self.ui.browser_textedit.setText(self.path)
+        self.ui.project_linedit.setText(self.proName)
         self.onlyInt = QtGui.QIntValidator()
         self.onlyFloats = QtGui.QDoubleValidator()
         self.ui.radioButton.toggled.connect(self.onClicked)
@@ -92,14 +92,14 @@ class M25Controls(QWidget):
         # self.ui.MsgLineEdit.setText("Default")
         # self.ui.StatusLineEdit.setText("OFFLINE")
         self.ui.radioButton.setChecked(True)
-        self.ui.BrowsePushButton.clicked.connect(self.browseState)
+        self.ui.browse_button.clicked.connect(self.browseState)
         self.ui.AcquireCamsButton.clicked.connect(self.AcquireState)
         self.ui.ReleaseCamsButton.clicked.connect(self.ReleaseState)
         self.ui.ConfButton.clicked.connect(self.ConfState)
         self.ui.CapturePushButton.clicked.connect(self.CaptureState)
         self.ui.GainlineEdit.setText(str(self.M25app.gain))
         self.ui.GainlineEdit.editingFinished.connect(self.sync_GainLineEdit)
-        self.ui.PNameLineEdit.editingFinished.connect(self.sync_PNameLineEdit)
+        self.ui.project_linedit.editingFinished.connect(self.sync_project_linedit)
         self.ui.LiveButton.clicked.connect(self.toggleLive)
         self.ui.StackFramesEdit.setText("0")
         self.ui.StackFramesEdit.editingFinished.connect(self.sync_StackFramesEdit)
@@ -125,7 +125,6 @@ class M25Controls(QWidget):
         self.ui.cycles_linedit.setValidator(self.onlyInt)
         self.ui.cycles_linedit.editingFinished.connect(self.sync_cycleLineEdit)
         self.ui.cycles_linedit.setPlaceholderText("50")
-        self.ui.summary_texEdit.setText("")
 
         # self.start_logging()
     
@@ -188,9 +187,9 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.acquire()
         box = self.sender()
         if box.isChecked():
-            self.M25app.timelapse_check = True
+            self.M25app.timeLapseMode = True
         else:
-            self.M25app.timelapse_check = False
+            self.M25app.timeLapseMode = False
         self.M25app.write_mutex.release()
         
     @pyqtSlot()
@@ -253,10 +252,10 @@ class M25Controls(QWidget):
     def sync_EXPLineEdit(self):
         exposure = self.ui.EXPLineEdit.text()
         self.M25app.write_mutex.acquire()
-        if len(text) > 0:
+        if len(exposure) > 0:
             fps_val = self.ui.FPSLineEdit.text()
             max_exposure = 1/fps_val - 18000
-            self.ui.exposure_max_settings.setText("Max at input FPS: ")
+            self.ui.exposure_max_settings.setText("Max with input FPS: ")
             
             self.M25app.exp = int(exposure)
         else:
@@ -284,8 +283,8 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
 
     @pyqtSlot()
-    def sync_PNameLineEdit(self):
-        self.acquisition_filename = self.ui.PNameLineEdit.text()
+    def sync_project_linedit(self):
+        self.acquisition_filename = self.ui.project_linedit.text()
         self.M25app.write_mutex.acquire()
         self.M25app.proName = self.acquisition_filename
         self.M25app.write_mutex.release()
@@ -316,7 +315,7 @@ class M25Controls(QWidget):
         #TODO: make this open at the default directory
         self.M25app.path = str(QFileDialog.getExistingDirectory(self, "Select Directory",self.path))
         self.path=self.M25app.path
-        self.ui.WritePLineEdit.setText(self.M25app.path)
+        self.ui.browser_textedit.setText(self.M25app.path)
     
     @pyqtSlot()
     def AcquireState(self):
@@ -364,9 +363,9 @@ class M25Controls(QWidget):
             if self.M25app.flags &_constants.CAPTURING:
                 pass
             else:
-                if self.M25app.zMode == True:
+                if self.M25app.zMode is True:
                     self.M25app.flags |= _constants.START_Z_STACK
-                elif self.M25app.timelapse_check is True:
+                elif self.M25app.timeLapseMode is True:
                     self.M25app.flags |= _constants.LAPSE_CAPTURE
                 else:
                     self.M25app.flags |= _constants.START_CAPTURE
