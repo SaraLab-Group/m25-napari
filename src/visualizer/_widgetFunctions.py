@@ -78,9 +78,14 @@ class M25Controls(QWidget):
         self.ui.FPSLineEdit.setText(str(self.M25app.fps))
         self.ui.FPSLineEdit.editingFinished.connect(self.sync_FPSLineEdit)
         self.ui.FPSLineEdit.setValidator(self.onlyFloats)
+        self.fps_max = 50
+        self.ui.FPS_Max_settings.setText("MAX: {}".format(self.fps_max))
         self.ui.EXPLineEdit.setText(str(self.M25app.exp))
         self.ui.EXPLineEdit.editingFinished.connect(self.sync_EXPLineEdit)
         self.ui.EXPLineEdit.setValidator(self.onlyInt)
+        self.exposure_max = 800
+        self.ui.exposure_max_settings.setText("MAX: {}".format(self.exposure_max))
+
         self.ui.CapTimeLineEdit.setText(str(self.M25app.capTime))
         self.ui.CapTimeLineEdit.editingFinished.connect(self.sync_CapTimeLineEdit)
         self.ui.CapTimeLineEdit.setValidator(self.onlyInt)
@@ -112,6 +117,16 @@ class M25Controls(QWidget):
         self.ui.loadBtn.clicked.connect(self.load_dataset)
         self.ui.toggleDM.clicked.connect(self.control_DM)
         self.ui.toggleLED.clicked.connect(self.control_LED)
+        self.ui.timelapse_check.setChecked(False)
+        self.ui.timelapse_check.stateChanged.connect(self.timelapseChecked)
+        self.ui.interval_linedit.setValidator(self.onlyFloats)
+        self.ui.interval_linedit.editingFinished.connect(self.sync_intervalLineEdit)
+        self.ui.interval_linedit.setPlaceholderText("3")
+        self.ui.cycles_linedit.setValidator(self.onlyInt)
+        self.ui.cycles_linedit.editingFinished.connect(self.sync_cycleLineEdit)
+        self.ui.cycles_linedit.setPlaceholderText("50")
+        self.ui.summary_texEdit.setText("")
+
         # self.start_logging()
     
 
@@ -168,7 +183,16 @@ class M25Controls(QWidget):
             self.M25app.bpp = (radioButton.value)
             # self.m25_log.debug("Button Value bpp: %d" % (radioButton.value))
         self.M25app.write_mutex.release()
-    
+    @pyqtSlot()
+    def timelapseChecked(self):
+        self.M25app.write_mutex.acquire()
+        box = self.sender()
+        if box.isChecked():
+            self.M25app.timelapse_check = True
+        else:
+            self.M25app.timelapse_check = False
+        self.M25app.write_mutex.release()
+        
     @pyqtSlot()
     def checkClicked(self):
         self.M25app.write_mutex.acquire()
@@ -227,10 +251,14 @@ class M25Controls(QWidget):
 
     @pyqtSlot()
     def sync_EXPLineEdit(self):
-        text = self.ui.EXPLineEdit.text()
+        exposure = self.ui.EXPLineEdit.text()
         self.M25app.write_mutex.acquire()
         if len(text) > 0:
-            self.M25app.exp = int(text)
+            fps_val = self.ui.FPSLineEdit.text()
+            max_exposure = 1/fps_val - 18000
+            self.ui.exposure_max_settings.setText("Max at input FPS: ")
+            
+            self.M25app.exp = int(exposure)
         else:
             self.M25app.exp = (0)
         self.M25app.write_mutex.release()
@@ -263,6 +291,16 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
+    def sync_intervalLineEdit(self):
+        interval = self.ui.interval_linedit.text()
+        self.M25app.lapse_min = float(interval)
+
+    @pyqtSlot()
+    def sync_cycleLineEdit(self):
+        cycles = self.ui.cycles_linedit.text()
+        self.M25app.lapse_count = int(cycles)
+
+    @pyqtSlot()
     def sync_StackFramesEdit(self):
         text = self.ui.StackFramesEdit.text()
 
@@ -284,6 +322,7 @@ class M25Controls(QWidget):
     def AcquireState(self):
         self.m25_log.debug("Acquire State")
         self.m25_log.debug("flags{}".format(self.M25app.flags))
+        # self.m25_log.debug("flags{}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.acquire()
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED or self.M25app.flags & _constants.CAPTURING:
             pass
@@ -327,9 +366,11 @@ class M25Controls(QWidget):
             else:
                 if self.M25app.zMode == True:
                     self.M25app.flags |= _constants.START_Z_STACK
+                elif self.M25app.timelapse_check is True:
+                    self.M25app.flags |= _constants.LAPSE_CAPTURE
                 else:
-                    self.m25_log.info("CAPTURE STARTED")
                     self.M25app.flags |= _constants.START_CAPTURE
+                self.m25_log.info("CAPTURE STARTED")
         self.M25app.write_mutex.release()
     
     @pyqtSlot()
@@ -359,6 +400,7 @@ class M25Controls(QWidget):
                 self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.release()
     
+
     @pyqtSlot()
     def cleanup_M25Plugin(self):
         self.m25_log.info("CLOSING STARTED")

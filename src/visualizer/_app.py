@@ -27,7 +27,7 @@ import napari
 from napari.qt.threading import thread_worker
 from napari import Viewer
 
-from PyQt5.QtCore import QMutex, QWaitCondition
+# from PyQt5.QtCore import QMutex, QWaitCondition
 
 class M25Communication:
     HOST = '127.0.0.1'  # The server's hostname or IP address
@@ -51,8 +51,8 @@ class M25Communication:
     z_frames: int = 0
     gain: float = 15.0
     flags: int = 0
-    lapse_count: int= 100
-    lapse_min: int = 1
+    lapse_count: int = 100
+    lapse_min: float = 1
 
     
     #Threading events
@@ -93,10 +93,10 @@ class M25Communication:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((self.HOST, self.PORT))
                 self.write_mutex.acquire()
-                values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime, self.path.encode(), self.proName.encode(), self.flags, self.gain)
-                packer = struct.Struct('L L f L L L L 255s 255s L d')
-                # values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime,self.lapse_min,self.lapse_count, self.path.encode(), self.proName.encode(), self.flags, self.gain)
-                # packer = struct.Struct('L L L L L L L L L 255s 255s L d')
+                # values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime, self.path.encode(), self.proName.encode(), self.flags, self.gain)
+                # packer = struct.Struct('L L f L L L L 255s 255s L d')
+                values = (self.horz, self.vert, self.fps, self.exp, self.bpp, self.z_frames, self.capTime, self.lapse_min,self.lapse_count, self.path.encode(), self.proName.encode(), self.flags, self.gain)
+                packer = struct.Struct('L L f L L L L f L 256s 256s L d')
                 packed_data = packer.pack(*values)
                 s.sendall(packed_data)
                 # logging.debug('flags: %d' % int(self.flags))                    
@@ -108,31 +108,31 @@ class M25Communication:
                 else:
                     self.flags = 0
                     self.write_mutex.release()
-                    data: bytes = s.recv(1024)
-                    (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,
-                        rec_path, rec_proName,
-                        rec_flags, rec_gain) = unpack(
-                        'L L f L L L L'
-                        '255s'
-                        '255s'
-                        'L'
-                        'd',
-                        data
-                    )                   
                     # data: bytes = s.recv(1024)
-                    # (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,\
-                    #     rec_lapse_min, rec_lapse_count,\
-                    #     rec_path, rec_proName,\
+                    # (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,
+                    #     rec_path, rec_proName,
                     #     rec_flags, rec_gain) = unpack(
-                    #     'L L L L L L L L L'
+                    #     'L L f L L L L'
                     #     '255s'
                     #     '255s'
                     #     'L'
                     #     'd',
                     #     data
-                    # )
-
-                    # self.m25_log.debug("receiving:{}".format(data.size()))
+                    # )                   
+                    data: bytes = s.recv(1024)
+                    (rec_horz, rec_vert, rec_fps, rec_exp, rec_bpp, rec_z_frames, rec_capTime,
+                        rec_lapse_min, rec_lapse_count,
+                        rec_path, rec_proName,
+                        rec_flags, rec_gain) = unpack(
+                        'L L f L L L L f L'
+                        '256s'
+                        '256s'
+                        'L'
+                        'd',
+                        data
+                    )
+                    
+                    # self.m25_log.debug(len(data))
             #pathStr = convert(rec_path)
                 # logging.debug('Received horz: %d' % int(rec_horz))
                 # logging.debug('Received vert: %d' % int(rec_vert))
