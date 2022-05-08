@@ -43,7 +43,7 @@ class M25Communication:
     timeLapseMode = False
     
     #Camera Globals
-    horz: int = 808
+    horz: int = 608
     vert: int = 608
     fps: np.float32 = 40
     exp: int = 20000

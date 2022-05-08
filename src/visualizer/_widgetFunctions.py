@@ -254,6 +254,7 @@ class M25Controls(QWidget):
         self.M25app.write_mutex.acquire()
         if len(exposure) > 0:
             fps_val = self.ui.FPSLineEdit.text()
+            fps_val = float(fps_val)
             max_exposure = 1/fps_val - 18000
             self.ui.exposure_max_settings.setText("Max with input FPS: ")
             
