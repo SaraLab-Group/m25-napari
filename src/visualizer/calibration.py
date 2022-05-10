@@ -77,12 +77,12 @@ def dask_raw_ds(folder_name,px_depth,width=808,height=608):
     # dask_raw_ds = da.stack(raw_ds,axis=1)
     return raw_ds
 
-def save_zarr(folder_name,entered_name,stack)
+### FILE MANAGEMENT READ/WRITE/SAVE
+def save_zarr(folder_name,entered_name,stack):
     filename = entered_name + '.zarr'
     filepath_save = os.path.join(main_folder,filename)
     zarr.save(filepath_save,stack)
 
-def 
 
 
 ## https://forum.image.sc/t/mask-and-crop-with-napari/54008/2

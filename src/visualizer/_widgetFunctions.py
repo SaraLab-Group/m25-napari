@@ -387,7 +387,7 @@ class M25Controls(QWidget):
                 self.M25app.flags |= _constants.STOP_LIVE
                 self.M25app.flags &= ~(_constants.LIVE_RUNNING)
                 # self.M25app.sleep_mutex.clear()
-                time.sleep(2)
+                time.sleep(1)
                 self.M25app.l_th.pause()
                 self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
             else:
