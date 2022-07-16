@@ -58,7 +58,7 @@ class M25Controls(QWidget):
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
         #TODO: change to a more default folder later
-        self.path = r'H:/Test'
+        self.path = r'D:/'
         
          ### Setup the UI and function connections
         self.ui.browser_textedit.setText(self.path)
@@ -78,7 +78,7 @@ class M25Controls(QWidget):
         self.ui.FPSLineEdit.setText(str(self.M25app.fps))
         self.ui.FPSLineEdit.editingFinished.connect(self.sync_FPSLineEdit)
         self.ui.FPSLineEdit.setValidator(self.onlyFloats)
-        self.fps_max = 50
+        self.fps_max = 160
         self.ui.FPS_Max_settings.setText("MAX: {}".format(self.fps_max))
         self.ui.EXPLineEdit.setText(str(self.M25app.exp))
         self.ui.EXPLineEdit.editingFinished.connect(self.sync_EXPLineEdit)
@@ -158,11 +158,10 @@ class M25Controls(QWidget):
 
     def _start_cmd(self):
         # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
-        # self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Debug'
-        self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Release'
+        self.exe_path = r'C:\Users\Callisto\Documents\abajor\M25_basler\basler_candidate\ide\x64\Debug'
         # self.exe_path = os.path.dirname(__file__)
         # self.exe_path = os.path.join(dirname,'')
-        self.myEXE = "m25_FLIR.exe"
+        self.myEXE = "Basler_Candidate.exe"
         # self.m25_log.debug(str(self.exe_path))
         self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
         # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
@@ -182,6 +181,7 @@ class M25Controls(QWidget):
             self.M25app.bpp = (radioButton.value)
             # self.m25_log.debug("Button Value bpp: %d" % (radioButton.value))
         self.M25app.write_mutex.release()
+
     @pyqtSlot()
     def timelapseChecked(self):
         self.M25app.write_mutex.acquire()
@@ -436,7 +436,6 @@ class M25Controls(QWidget):
         else:
             stack = calibration.lazy_dask_stack(loading_path,num_cams=3, px_depth='uint8', height=self.M25app.vert, width =self.M25app.horz)
         self.viewer.add_image(stack,scale=[z_scale,1,1], multiscale=False)
-    
     
     @pyqtSlot()
     def control_LED(self):
