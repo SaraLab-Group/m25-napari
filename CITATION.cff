@@ -1,0 +1,16 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+doi: 10.5281/zenodo.7314572
+authors:
+  - given-names: Eduardo
+    family-names: Hirata-Miyasaki
+    affiliation: University of California, Santa Cruz
+  - given-names: Antone
+    family-names: Bajor
+    affiliation: University of California, Santa Cruz
+  - given-names: Sara
+    family-names: Abrahamsson
+    affiliation: University of California, Santa Cruz
+title: 'm25-napari: GUI and Controls for 25 plane camera array multifocus microscopy (M25)"
+repository-code: https://github.com/SaraLab-Group/m25-napari
+license: BSD-3-Clause
