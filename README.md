@@ -6,6 +6,7 @@
 [![tests](https://github.com/SaraLab-Group/m25-napari/workflows/tests/badge.svg)](https://github.com/SaraLab-Group/m25-napari/actions)
 [![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
+[![DOI](https://zenodo.org/badge/443224520.svg)](https://zenodo.org/badge/latestdoi/443224520)
 
 ## 🦠🔬 25 plane-camera array mutlifocus microscopy (M25) Controls and Image Visualization 
 GUI for M25 control of 25 cameras for live-data visualization, control and acquisition. 
