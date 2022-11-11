@@ -1,4 +1,4 @@
-# m25-napari
+# M25-napari
 
 [![License](https://img.shields.io/pypi/l/m25-napari.svg?color=green)](https://github.com/SaraLab-Group/m25-napari/raw/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/m25-napari.svg?color=green)](https://pypi.org/project/m25-napari)
@@ -7,7 +7,12 @@
 [![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
 
-M25 Controls and volumetric image analyisis
+## 🦠🔬 25 plane-camera array mutlifocus microscopy (M25) Controls and Image Visualization 
+GUI for M25 control of 25 cameras for live-data visualization, control and acquisition. 
+
+![m25-napari plugin and napari viewer with Celegans data](https://github.com/SaraLab-Group/m25-napari/blob/main/docs/image/m25-napari-plugin.png)
+
+The GUI requires separate installation of the [M25 Acquisition engine](https://github.com/SaraLab-Group/M25_Acqusition_Engine) to communitcate with PSoC Timing Controller and cameras.
 
 ----------------------------------
 
@@ -26,8 +31,6 @@ https://napari.org/plugins/stable/index.html
 You can install `m25-napari` via [pip]:
 
     pip install m25-napari
-
-
 
 To install latest development version :
 
