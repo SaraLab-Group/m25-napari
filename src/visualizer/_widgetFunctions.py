@@ -1,7 +1,6 @@
 
 import sys
 import os
-from this import d
 import psutil
 # import binascii
 # import threading
@@ -36,13 +35,14 @@ from PyQt5 import QtGui
 
 # from PyQt5.QtCore import QMutex, QWaitCondition
 
-from visualizer.Qt import M25GUI
-from visualizer._app import M25Communication
-import visualizer._constants as _constants
+# import all visualizer modules
+from Qt import M25GUI
+from _app import M25Communication
+import _constants
 
 import logging
 from napari import Viewer
-import visualizer.calibration as calibration
+import calibration
 
 class M25Controls(QWidget):   
     def __init__(self,napari_viewer:Viewer):

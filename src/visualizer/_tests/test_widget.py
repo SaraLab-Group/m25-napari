@@ -1,4 +1,6 @@
-import visualizer
+
+import sys
+import os
 import pytest
 
 # this is your plugin name declared in your napari.plugins entry point
