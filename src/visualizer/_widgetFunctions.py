@@ -1,7 +1,6 @@
 
 import sys
 import os
-from this import d
 import psutil
 # import binascii
 # import threading
