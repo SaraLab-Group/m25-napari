@@ -20,7 +20,7 @@ import socket
 
 from ctypes import *
 # from typing import Any, Tuple
-import _constants
+import visualizer._constants as _constants
 import logging
 
 import napari
