@@ -1,6 +1,11 @@
 
 import sys
 import os
+
+from os.path import dirname as up
+import tkinter as tk
+from tkinter import filedialog
+
 import psutil
 # import binascii
 # import threading
@@ -43,10 +48,14 @@ import logging
 from napari import Viewer
 import visualizer.calibration as calibration
 
+demo_mode = True
+
 class M25Controls(QWidget):   
     def __init__(self,napari_viewer:Viewer):
         super().__init__()
-        self._start_cmd()
+        # connect to cameras through .exe file if demo mode is False
+        if not demo_mode:
+            self._start_cmd()
         self.M25app = None
         # self.worker_client = None
         # self.worker_liveV = None 
@@ -56,8 +65,8 @@ class M25Controls(QWidget):
         #Init GUI with default
         self.today = date.today()
         self.proName = self.today.strftime("%Y%m%d_M25")  # As Per Request
-        #TODO: change to a more default folder later
-        self.path = r'H:/Test'
+        #path of m25_napari git on local compute
+        self.path = up(up(up(__file__)))
         
          ### Setup the UI and function connections
         self.ui.browser_textedit.setText(self.path)
@@ -136,13 +145,16 @@ class M25Controls(QWidget):
 
         #TODO: make sure live thread is paused before M25 initalization
         self.m25_log.info('Initializing Comm')
+        if demo_mode:
+            self.m25_log.info('Only running in DEMO MODE!')
         #Initialize the Qt GUI and the M25 Communications
         # self._start_cmd()
+        
         self.M25app = M25Communication(self.viewer)
         self._start_threads()
-        # self.M25app._init_threads()
+            # self.M25app._init_threads()
 
-        ### Initialize M25 app communication file and globals
+            ### Initialize M25 app communication file and globals
         self.M25app.bpp = 8
         
     def start_logging(self):
@@ -156,13 +168,18 @@ class M25Controls(QWidget):
         # logging.getLogger().setLevel(logging.INFO)
 
     def _start_cmd(self):
-        # TODO: Make this modular so that we can have the exe path at a fixed folder from installation 
-        # self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Debug'
-        self.exe_path = r'C:\Users\yoshi\Documents\M25\m25_FLIR\m25_flir\m25_FLIR\bin\x64\Release'
+        
+        #Ask user for camera .exe file location with pop up window, only when not in Demo mode
+        root = tk.Tk()
+        root.withdraw() 
+        file_path_exe = filedialog.askopenfilename()
+        self.exe_path = os.path.dirname(os.path.abspath(file_path_exe))
         # self.exe_path = os.path.dirname(__file__)
         # self.exe_path = os.path.join(dirname,'')
-        self.myEXE = "m25_FLIR.exe"
+        self.myEXE = os.path.basename(file_path_exe)
+        print(self.myEXE)
         # self.m25_log.debug(str(self.exe_path))
+        print(self.exe_path)
         self.rc = call("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
         # self.rc = Popen("start cmd /K " + self.myEXE, cwd=self.exe_path, shell=True)  # run `cmdline` in `dir`
     
