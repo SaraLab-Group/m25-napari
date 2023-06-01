@@ -28,7 +28,7 @@ https://napari.org/plugins/stable/index.html
 -->
 
 ## Installation
-
+This repository was tested with CUDA 11.2 and cuDNN 8.1 pre-installed on Windows 10. 
 You can install `m25-napari` via [pip]:
 
     pip install m25-napari
