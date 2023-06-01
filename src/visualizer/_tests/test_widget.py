@@ -2,6 +2,7 @@
 import sys
 import os
 import pytest
+import visualizer
 
 # this is your plugin name declared in your napari.plugins entry point
 MY_PLUGIN_NAME = "m25-napari"
