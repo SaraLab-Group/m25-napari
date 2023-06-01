@@ -35,7 +35,12 @@ You can install `m25-napari` via [pip]:
 
 To install latest development version :
 
-    pip install git+https://github.com/SaraLab-Group/m25-napari.git
+    git clone https://github.com/SaraLab-Group/m25-napari.git
+    cd m25-napari
+    conda env create -f ./environment.yml
+    conda activate m25-napari
+    pip install -e .
+    
 
 
 ## Contributing

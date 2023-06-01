@@ -1,4 +1,4 @@
-name: ed_nap
+name: m25-napari
 channels:
   - defaults
 dependencies:
