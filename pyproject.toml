@@ -7,7 +7,7 @@ build-baclend = "setuptools.build_meta"
 minversion = "6.0"
 addopts = "-ra -q"
 testpaths = [
-    "tests",
+    "src/visualizer/_tests",
 ]
 
 [tool.mypy]

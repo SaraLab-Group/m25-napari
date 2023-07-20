@@ -31,7 +31,7 @@ from napari import Viewer
 class M25Communication:
     HOST = '127.0.0.1'  # The server's hostname or IP address
     PORT = 27015  # The port used by the server
-    run = True
+    run = False
     path = ""
     today = date.today()
     proName = today.strftime("%Y%m%d_M25")  #As Per Request

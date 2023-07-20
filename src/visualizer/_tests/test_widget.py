@@ -7,7 +7,7 @@ import visualizer
 # this is your plugin name declared in your napari.plugins entry point
 MY_PLUGIN_NAME = "m25-napari"
 # the name of your widget(s)
-MY_WIDGET_NAMES = ["M25Controls"]
+MY_WIDGET_NAMES = ["M25 controls"]
 
 
 @pytest.mark.parametrize("widget_name", MY_WIDGET_NAMES)
@@ -18,4 +18,4 @@ def test_something_with_viewer(widget_name, make_napari_viewer):
         plugin_name=MY_PLUGIN_NAME, widget_name=widget_name
     )
     assert len(viewer.window._dock_widgets) == num_dw + 1
-
+   
