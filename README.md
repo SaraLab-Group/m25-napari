@@ -42,7 +42,10 @@ To install latest development version :
     pip install -e .
     
 ## Usage
-
+Launch:
+```python
+napari -w m25-napari
+```
 The module can be run by running `napari`in the command line and selecting `m25-napari:M25 Controls` under Plugins. By Default, the demo mode is set which skips the connection to the PSoC Timing controller and the cameras and allows viewing of the GUI through Napari. If the user has setup the controller and cameras, the demo mode can be turned off by setting `demo_mode = False` in the file `src/visualizer/_widgetFunctions.py`. 
 
 ## Contributing
