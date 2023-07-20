@@ -48,6 +48,7 @@ dependencies:
       - fasteners==0.18
       - fastjsonschema==2.17.1
       - fastrlock==0.8.1
+      - flake8>=3.9
       - fonttools==4.39.4
       - fqdn==1.5.1
       - freetype-py==2.4.0
@@ -85,6 +86,7 @@ dependencies:
       - mdurl==0.1.2
       - mistune==2.0.5
       - mypy-extensions==1.0.0
+      - mypy>=0.910
       - napari==0.4.15
       - napari-console==0.0.8
       - napari-plugin-engine==0.2.0
@@ -130,6 +132,7 @@ dependencies:
       - pyqt5-sip==12.12.1
       - pyrsistent==0.19.3
       - pytest==7.1.2
+      - pytest-cov>=2.0
       - python-dateutil==2.8.2
       - python-json-logger==2.0.7
       - pytomlpp==1.0.13
@@ -168,6 +171,7 @@ dependencies:
       - tomli==2.0.1
       - toolz==0.12.0
       - tornado==6.3.2
+      - tox>=3.24
       - tqdm==4.65.0
       - traitlets==5.9.0
       - typer==0.9.0
