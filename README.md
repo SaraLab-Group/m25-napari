@@ -3,8 +3,6 @@
 [![License](https://img.shields.io/pypi/l/m25-napari.svg?color=green)](https://github.com/SaraLab-Group/m25-napari/blob/main/LICENSE.md)
 [![PyPI](https://img.shields.io/pypi/v/m25-napari.svg?color=green)](https://pypi.org/project/m25-napari)
 [![Python Version](https://img.shields.io/pypi/pyversions/m25-napari.svg?color=green)](https://python.org)
-[![tests](https://github.com/SaraLab-Group/m25-napari/workflows/tests/badge.svg)](https://github.com/SaraLab-Group/m25-napari/actions)
-[![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
 [![DOI](https://zenodo.org/badge/443224520.svg)](https://zenodo.org/badge/latestdoi/443224520)
 
