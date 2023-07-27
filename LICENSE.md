@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2021, Eduardo Hirata-Miyasaki
+Copyright (c) 2023, Eduardo Hirata-Miyasaki
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

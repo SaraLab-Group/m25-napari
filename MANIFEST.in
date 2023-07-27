@@ -1,6 +1,6 @@
-include LICENSE
+include LICENSE.md
 include README.md
-include requirements.txt
+include environment.yml
 
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
