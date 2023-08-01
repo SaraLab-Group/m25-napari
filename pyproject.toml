@@ -1,5 +1,12 @@
 [build-system]
-requires = ["setuptools>=42.0", "wheel"]
+requires = ["setuptools>=42.0", 
+    "wheel",
+    "tifffile",
+    "napari>=0.4.13",
+    "numpy",
+    "zarr",
+    "cupy-cuda11x",
+    "sphinx"]
 build-backend = "setuptools.build_meta"
 
 # pyproject.toml
