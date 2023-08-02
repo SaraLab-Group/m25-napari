@@ -1,7 +1,10 @@
 # M25-napari
 
-[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![License](https://img.shields.io/pypi/l/m25-napari.svg?color=green)](https://github.com/SaraLab-Group/m25-napari/blob/main/LICENSE.md)
 [![PyPI](https://img.shields.io/pypi/v/m25-napari.svg?color=green)](https://pypi.org/project/m25-napari)
+[![Python Version](https://img.shields.io/pypi/pyversions/m25-napari.svg?color=green)](https://python.org)
+[![tests](https://github.com/SaraLab-Group/m25-napari/workflows/tests/badge.svg)](https://github.com/SaraLab-Group/m25-napari/actions)
+[![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
 [![DOI](https://zenodo.org/badge/443224520.svg)](https://zenodo.org/badge/latestdoi/443224520)
 
@@ -39,7 +42,10 @@ To install latest development version :
     pip install -e .
     
 ## Usage
-
+Launch:
+```python
+napari -w m25-napari
+```
 The module can be run by running `napari`in the command line and selecting `m25-napari:M25 Controls` under Plugins. By Default, the demo mode is set which skips the connection to the PSoC Timing controller and the cameras and allows viewing of the GUI through Napari. If the user has setup the controller and cameras, the demo mode can be turned off by setting `demo_mode = False` in the file `src/visualizer/_widgetFunctions.py`. 
 
 ## Contributing
