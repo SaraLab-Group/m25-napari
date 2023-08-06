@@ -1,11 +1,6 @@
 # M25-napari
 
-[![License](https://img.shields.io/pypi/l/m25-napari.svg?color=green)](https://github.com/SaraLab-Group/m25-napari/blob/main/LICENSE.md)
-[![PyPI](https://img.shields.io/pypi/v/m25-napari.svg?color=green)](https://pypi.org/project/m25-napari)
-[![Python Version](https://img.shields.io/pypi/pyversions/m25-napari.svg?color=green)](https://python.org)
-[![tests](https://github.com/SaraLab-Group/m25-napari/workflows/tests/badge.svg)](https://github.com/SaraLab-Group/m25-napari/actions)
-[![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![DOI](https://zenodo.org/badge/443224520.svg)](https://zenodo.org/badge/latestdoi/443224520)
 
 ## 🦠🔬 25 plane-camera array mutlifocus microscopy (M25) Controls and Image Visualization 
@@ -28,12 +23,7 @@ https://napari.org/plugins/stable/index.html
 -->
 
 ## Installation
-This repository was tested with CUDA 11.2 and cuDNN 8.1 pre-installed on Windows 10. 
-You can install `m25-napari` via [pip]:
-
-    pip install m25-napari
-
-To install latest development version :
+This repository was tested with CUDA 11.2 and cuDNN 8.1 pre-installed on Windows 10. For install please use the latest development version :
 
     git clone https://github.com/SaraLab-Group/m25-napari.git
     cd m25-napari
@@ -47,11 +37,6 @@ Launch:
 napari -w m25-napari
 ```
 The module can be run by running `napari`in the command line and selecting `m25-napari:M25 Controls` under Plugins. By Default, the demo mode is set which skips the connection to the PSoC Timing controller and the cameras and allows viewing of the GUI through Napari. If the user has setup the controller and cameras, the demo mode can be turned off by setting `demo_mode = False` in the file `src/visualizer/_widgetFunctions.py`. 
-
-## Contributing
-
-Contributions are very welcome. Tests can be run with [tox], please ensure
-the coverage at least stays the same before you submit a pull request.
 
 ## License
 
