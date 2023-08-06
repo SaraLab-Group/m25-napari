@@ -80,6 +80,7 @@ dependencies:
       - magicgui==0.7.2
       - markdown-it-py==2.2.0
       - markupsafe==2.1.2
+      - matplotlib
       - matplotlib-inline==0.1.6
       - mdurl==0.1.2
       - mistune==2.0.5
