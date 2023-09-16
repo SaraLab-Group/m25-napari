@@ -12,7 +12,6 @@ from glob import glob
 from skimage import io
 import dask
 import dask.array as da
-import zarr
 
 @dask.delayed
 # Read RAW files and return Dask Array
@@ -79,7 +78,7 @@ def dask_raw_ds(folder_name,px_depth,width=808,height=608):
     return raw_ds
 
 ### FILE MANAGEMENT READ/WRITE/SAVE
-def save_zarr(main_folder,entered_name,stack):
+def save_zarr(folder_name,entered_name,stack):
     filename = entered_name + '.zarr'
     filepath_save = os.path.join(main_folder,filename)
     zarr.save(filepath_save,stack)
