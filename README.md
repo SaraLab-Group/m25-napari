@@ -1,13 +1,14 @@
-# m25-napari
+# M25-napari
 
-[![License](https://img.shields.io/pypi/l/m25-napari.svg?color=green)](https://github.com/SaraLab-Group/m25-napari/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/m25-napari.svg?color=green)](https://pypi.org/project/m25-napari)
-[![Python Version](https://img.shields.io/pypi/pyversions/m25-napari.svg?color=green)](https://python.org)
-[![tests](https://github.com/SaraLab-Group/m25-napari/workflows/tests/badge.svg)](https://github.com/SaraLab-Group/m25-napari/actions)
-[![codecov](https://codecov.io/gh/SaraLab-Group/m25-napari/branch/main/graph/badge.svg)](https://codecov.io/gh/SaraLab-Group/m25-napari)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/m25-napari)](https://napari-hub.org/plugins/m25-napari)
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![DOI](https://zenodo.org/badge/443224520.svg)](https://zenodo.org/badge/latestdoi/443224520)
 
-M25 Controls and volumetric image analyisis
+## 🦠🔬 25 plane-camera array mutlifocus microscopy (M25) Controls and Image Visualization 
+GUI for M25 control of 25 cameras for live-data visualization, control and acquisition. 
+
+![m25-napari plugin and napari viewer with Celegans data](https://github.com/SaraLab-Group/m25-napari/blob/main/docs/image/m25-napari-plugin.png)
+
+The GUI requires separate installation of the [M25 Acquisition engine](https://github.com/SaraLab-Group/M25_Acqusition_Engine) to communitcate with PSoC Timing Controller and cameras.
 
 ----------------------------------
 
@@ -22,17 +23,21 @@ https://napari.org/plugins/stable/index.html
 -->
 
 ## Installation
+This repository was tested with CUDA 11.2 and cuDNN 8.1 pre-installed on Windows 10. For install please use the latest development version :
 
-You can install `m25-napari` via [pip]:
+    git clone https://github.com/SaraLab-Group/m25-napari.git
+    cd m25-napari
+    conda env create -f ./environment.yml
+    conda activate m25-napari
+    pip install -e .
+    
+## Usage
+Launch:
+```python
+napari -w m25-napari
+```
 
-    pip install m25-napari
-
-
-
-To install latest development version :
-
-    pip install git+https://github.com/SaraLab-Group/m25-napari.git
-
+The module can be run by running `napari` in the command line and selecting `m25-napari:M25 Controls` under Plugins or running `napari -w m25-napari`. By Default, the demo mode is set which skips the connection to the PSoC Timing controller and the cameras and allows viewing of the GUI through Napari. If the user has setup the controller and cameras, the demo mode can be turned off by setting `demo_mode = False` in the file `src/visualizer/_widgetFunctions.py`. 
 
 ## Contributing
 
