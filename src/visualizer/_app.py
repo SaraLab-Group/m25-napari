@@ -41,12 +41,13 @@ class M25Communication:
     singleMode = False
     singleCam = 13
     timeLapseMode = False
+    set_clean = False
     
     #Camera Globals
     horz: int = 608
     vert: int = 608
-    fps: np.float32 = 40
-    exp: int = 20000
+    fps: np.float32 = 50.0
+    exp: int = 19000
     bpp: int = 8
     capTime: int = 15
     z_frames: int = 0
@@ -54,6 +55,7 @@ class M25Communication:
     flags: int = 0
     lapse_count: int = 100
     lapse_min: float = 1
+
 
     
     #Threading events
@@ -128,7 +130,7 @@ class M25Communication:
                         'L L f L L L L f L'
                         '256s'
                         '256s'
-                        'L'
+                        'L' 
                         'd',
                         data
                     )
@@ -161,7 +163,7 @@ class M25Communication:
             # self.sleep_mtx.lock()
             # self.live_sleep.wait(self.sleep_mtx)
             # self.sleep_mtx.unlock()
-            
+            # self.m25_log.info("Live Running check %d", self.live_running)
             if self.run and self.live_running:
                 self.m25_log.debug("IT's ALIVEEEEEE")
                 self.live_running = True
@@ -199,21 +201,21 @@ class M25Communication:
                     # yield np.array(dst)
 
                 while self.live_running:
-                    self.m25_log.debug("LIVE RUNNING SETUP")
+                    # self.m25_log.debug("LIVE RUNNING SETUP")
                     # self.m25_log.debug("live_running flag: {}".format(self.live_running))
                     # start = time.time()
                     read_flags = RW_flags.read_byte()
                     # logging.debug("FLAG"+ str(read_flags))
                     RW_flags.seek(0)
                     if read_flags & _constants.WRITING_BUFF1:
-                        self.m25_log.debug("BUFF2")
+                        # self.m25_log.debug("BUFF2")
                         read_flags |= _constants.READING_BUFF2
                         #read_flags &= ~(READING_BUFF1)
                         RW_flags.write_byte(read_flags)
                         for i in range(25):
                             frameVect.append(buff2.read(int(imageSize)))
                     else:
-                        self.m25_log.debug("BUFF1")
+                        # self.m25_log.debug("BUFF1")
                         read_flags |= _constants.READING_BUFF1
                         #read_flags &= ~(READING_BUFF2)
                         RW_flags.write_byte(read_flags)
@@ -242,17 +244,21 @@ class M25Communication:
                                                         frameVect[i],
                                                         'raw', 'L', 0, 1)
                             dst.paste(image_conv, [self.horz * (i % 5), self.vert * ((i // 5 % 5))])
-                        self.m25_log.debug("before yield")
+                        # self.m25_log.debug("before yield")
 
                         yield np.array(dst)
-
-                    if not self.live_running:
-                        dst=[]  
+                    # self.m25_log.info("Live Running check %d", self.live_running)
+                    #**** THIS NEVER HAPPENS ****#
+                    # if not self.live_running:
+                    #     dst=[] 
+                    #     self.m25_log.info("cleared dst") 
 
                     frameVect.clear()
                     #time.sleep(0.001)
                     # logging.debug("total time taken this loop:{}".format(str(time.time() - start)))
-                
+                # if not self.live_running:
+                #         dst=[] 
+                #         self.m25_log.info("cleared dst")
                 RW_flags.close()
                 buff1.close()
                 buff2.close()

@@ -366,6 +366,7 @@ class M25Controls(QWidget):
             else:
                 if self.M25app.zMode is True:
                     self.M25app.flags |= _constants.START_Z_STACK
+                    self.m25_log.debug("Z-Stack Mode")
                 elif self.M25app.timeLapseMode is True:
                     self.M25app.flags |= _constants.LAPSE_CAPTURE
                 else:
@@ -379,25 +380,28 @@ class M25Controls(QWidget):
         self.m25_log.debug("LIVE PRESS")
         self.m25_log.info("Live Running %d", self.M25app.live_running)
         if self.M25app.flags & _constants.CAMERAS_ACQUIRED:
-            if self.M25app.flags & _constants.CAPTURING:
-                pass
-            elif self.M25app.live_running:
-                self.m25_log.info("STOPPING LIVE")
-                self.M25app.live_running = False
-                self.M25app.flags |= _constants.STOP_LIVE
-                self.M25app.flags &= ~(_constants.LIVE_RUNNING)
-                # self.M25app.sleep_mutex.clear()
-                time.sleep(1)
-                self.M25app.l_th.pause()
-                self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
+            if self.M25app.bpp > 8:
+                self.m25_log.debug("LIVE only works at 8bpp")
             else:
-                self.M25app.live_running = True
-                self.m25_log.info("LIVE RUNNING")
-                self.M25app.flags |= _constants.START_LIVE
-                # self.M25app.sleep_mutex.set()
-                self.M25app.l_th.resume()
-                # self.M25app.live_sleep.wakeOne()
-                self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
+                if self.M25app.flags & _constants.CAPTURING:
+                    pass
+                elif self.M25app.live_running:
+                    self.m25_log.info("STOPPING LIVE")
+                    self.M25app.live_running = False
+                    self.M25app.flags |= _constants.STOP_LIVE
+                    self.M25app.flags &= ~(_constants.LIVE_RUNNING)
+                    # self.M25app.sleep_mutex.clear()
+                    time.sleep(1)
+                    self.M25app.l_th.pause()
+                    self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
+                else:
+                    self.M25app.live_running = True
+                    self.m25_log.info("LIVE RUNNING")
+                    self.M25app.flags |= _constants.START_LIVE
+                    # self.M25app.sleep_mutex.set()
+                    self.M25app.l_th.resume()
+                    # self.M25app.live_sleep.wakeOne()
+                    self.m25_log.debug("flags: {}".format(str(hex(self.M25app.flags))))
         self.M25app.write_mutex.release()
     
 
